@@ -1,0 +1,19 @@
+# See: https://arduino.github.io/arduino-cli/latest/platform-specification/
+
+menu.pnum=Board part number
+
+menu.opt=Optimize
+menu.rtlib=C Runtime Library
+menu.upload_method=Upload method
+
+################################################################################
+# TOPST VCP TCC7045
+vcp.name=TOPST VCP
+vcp.build.core=vcp
+vcp.build.mcu=cortex-r5
+# vcp is variant directory name
+vcp.build.variant=vcp
+# build.board is passed to the build system as -DBOARD_NAME=\"vcp\"
+vcp.build.board=vcp
+vcp.build.ldscript=linker_scripts/linker_512.ld
+
