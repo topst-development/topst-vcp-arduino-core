@@ -1,14 +1,12 @@
-# STM32 ARM Core and platform.
+# TOPST VCP Arduino platform.txt
 # ------------------------------
 #
 # For more info:
 # https://arduino.github.io/arduino-cli/latest/platform-specification/
 
-name=TOPST VCP Arduino board group
-version=1.9.0
+name=TOPST VCP Arduino
+version=1.0.0
 
-# STM compile variables
-# ----------------------
 compiler.extra_include="-I{build.source.path}" "-I{build.core.path}/tcc70xx"
 
 compiler.warning_flags=-w
@@ -29,18 +27,19 @@ compiler.c.elf.cmd=arm-none-eabi-gcc
 compiler.objcopy.cmd=arm-none-eabi-objcopy
 compiler.elf2hex.cmd=arm-none-eabi-objcopy
 compiler.libraries.ldflags=
+compiler.cflags=-g -gdwarf-2 -DFMU_DRIVER -fdata-sections -ffunction-sections -mfloat-abi=soft -DOS_FREERTOS -DPFLASH_STANDALONE -DDEBUG_ENABLE=1 -D__MPU_ENABLED__
 
-compiler.extra_flags=-mcpu={build.mcu} {build.flags.fp} 
+compiler.extra_flags=-mcpu={build.mcu} {build.flags.fp}
 
-compiler.S.flags={compiler.extra_flags} -c -x assembler-with-cpp {compiler.extra_include}
+compiler.S.flags={compiler.extra_flags} -c -x assembler-with-cpp {compiler.cflags} {compiler.extra_include}
 
-compiler.c.flags={compiler.extra_flags} -c {build.flags.optimize} {compiler.warning_flags} -std=gnu11 -ffunction-sections -fdata-sections -nostdlib --param max-inline-insns-single=500 -MMD {compiler.extra_include}
+compiler.c.flags={compiler.extra_flags} -c {build.flags.optimize} {compiler.warning_flags} {compiler.cflags} {compiler.extra_include}
 
-compiler.cpp.flags={compiler.extra_flags} -c {build.flags.optimize} {compiler.warning_flags} -std={compiler.cpp.std} -ffunction-sections -fdata-sections -nostdlib -fno-threadsafe-statics --param max-inline-insns-single=500 -fno-rtti -fno-exceptions -fno-use-cxa-atexit -MMD {compiler.extra_include}
+compiler.cpp.flags={compiler.extra_flags} -c {build.flags.optimize} {compiler.warning_flags} -std={compiler.cpp.std} -ffunction-sections -fdata-sections -nostdlib -fno-threadsafe-statics -fno-rtti -fno-exceptions -fno-use-cxa-atexit -MMD {compiler.extra_include}
 
 compiler.ar.flags=rcs
 
-compiler.c.elf.flags=-mcpu={build.mcu} {build.flags.fp} -mthumb {build.flags.optimize} {build.flags.ldspecs} -Wl,--check-sections -Wl,--gc-sections -Wl,--entry=reset_handler -Wl,--unresolved-symbols=report-all -Wl,--warn-common
+compiler.c.elf.flags=-mcpu={build.mcu} {build.flags.fp} -mthumb {build.flags.optimize} {build.flags.ldspecs} -Wl,--gc-sections -Wl,--unresolved-symbols=report-all -Wl,--warn-common
 
 compiler.objcopy.eep.flags=-O ihex -j .eeprom --set-section-flags=.eeprom=alloc,load --no-change-warnings --change-section-lma .eeprom=0
 
@@ -49,7 +48,7 @@ compiler.elf2hex.flags=-O ihex
 
 compiler.ldflags=
 compiler.size.cmd=arm-none-eabi-size
-compiler.define=-DARDUINO=
+compiler.define=-DOS_FREERTOS
 
 # These can be overriden in boards.txt
 build.extra_flags=
@@ -79,8 +78,8 @@ build.enable_virtio=
 build.peripheral_pins=
 build.startup_file=
 build.flags.fp=
-build.flags.optimize=-Os
-build.flags.ldspecs=--specs=nano.specs
+build.flags.optimize=
+build.flags.ldspecs=-specs=nano.specs
 build.flash_offset=0
 
 extras.path={build.system.path}/extras
@@ -101,7 +100,7 @@ recipe.S.o.pattern="{compiler.path}{compiler.S.cmd}" {compiler.S.flags} {build.i
 recipe.ar.pattern="{compiler.path}{compiler.ar.cmd}" {compiler.ar.flags} {compiler.ar.extra_flags} "{archive_file_path}" "{object_file}"
 
 ## Combine gc-sections, archives, and objects
-recipe.c.combine.pattern="{compiler.path}{compiler.c.elf.cmd}" {compiler.c.elf.flags} "-Wl,--default-script={build.variant.path}/{build.ldscript}" "-Wl,-Map,{build.path}/{build.project_name}.map" {compiler.c.elf.extra_flags} {compiler.ldflags} -o "{build.path}/{build.project_name}.elf" "-L{build.path}" -Wl,--start-group {object_files} {compiler.libraries.ldflags} "{archive_file_path}" -lc -Wl,--end-group -lm -lgcc -lstdc++
+recipe.c.combine.pattern="{compiler.path}{compiler.c.elf.cmd}" {compiler.c.elf.flags} "-T{build.variant.path}/{build.ldscript}" "-Wl,-Map,{build.path}/{build.project_name}.map" {compiler.c.elf.extra_flags} {compiler.ldflags} -o "{build.path}/{build.project_name}.elf" "-L{build.path}" {object_files} {compiler.libraries.ldflags} "{archive_file_path}" -lc -lm -lgcc -nostartfiles 
 
 ## Create output (.bin file)
 recipe.objcopy.bin.pattern="{compiler.path}{compiler.objcopy.cmd}" {compiler.elf2bin.flags} {compiler.elf2bin.extra_flags} "{build.path}/{build.project_name}.elf" "{build.path}/{build.project_name}.bin"
