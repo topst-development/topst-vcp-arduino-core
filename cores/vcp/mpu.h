@@ -212,21 +212,21 @@
     //#include <arm_ghs.h> //QAC modify
     extern uint32_t __MRC
     (
-        uint32_t                          coproc,
-        uint32_t                          opcode1,
-        uint32_t                          CRn,
-        uint32_t                          CRm,
-        uint32_t                          opcode2
+        int32_t                          coproc,
+        int32_t                          opcode1,
+        int32_t                          CRn,
+        int32_t                          CRm,
+        int32_t                          opcode2
     );
 
     extern void __MCR
     (
-        uint32_t                          coproc,
-        uint32_t                          opcode1,
+        int32_t                          coproc,
+        int32_t                          opcode1,
         uint32_t                          Rd,
-        uint32_t                          CRn,
-        uint32_t                          CRm,
-        uint32_t                          opcode2
+        int32_t                          CRn,
+        int32_t                          CRm,
+        int32_t                          opcode2
     );
 
     #define MPU_ARM_CP15_MAIN_ID                15,0,0,0,0

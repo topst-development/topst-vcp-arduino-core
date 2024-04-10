@@ -164,7 +164,6 @@ extern SALFileFunc_t *                  gSALFileTable;
 extern SALDataStructFunc_t *            gSALDataStructTable;
 extern SALSyncObjectFunc_t *            gSALSyncObjectTable;
 extern SALTaskFunc_t *                  gSALTaskTable;
-extern SALSocketFunc_t *                gSALSocketTable;
 extern SALTraceFunc_t *                 gSALTraceTable;
 extern SALEtcFunc_t *                   gSALEtcTable;
 

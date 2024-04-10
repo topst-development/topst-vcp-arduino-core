@@ -182,7 +182,7 @@ static SALRetCode_t FR_MemCmp
     const void *                        pMem1,
     const void *                        pMem2,
     SALSize                             uiSize,
-    uint32_t *                            piRetCmp
+    int32_t *                            piRetCmp
 );
 
 static SALRetCode_t FR_StrCopy
@@ -195,7 +195,7 @@ static SALRetCode_t FR_StrCmp
 (
     const uint8_t *                       puc1String,
     const uint8_t *                       puc2String,
-    uint32_t *                            piRetCmp
+    int32_t *                            piRetCmp
 );
 
 static SALRetCode_t FR_StrNCmp
@@ -203,7 +203,7 @@ static SALRetCode_t FR_StrNCmp
     const uint8_t *                       puc1String,
     const uint8_t *                       puc2String,
     SALSize                             uiLength,
-    uint32_t *                            piRetCmp
+    int32_t *                            piRetCmp
 );
 
 static SALRetCode_t FR_StrLength
@@ -234,7 +234,7 @@ static SALRetCode_t FR_QueuePut
     uint32_t                              uiId,
     void *                              pData,
     SALSize                             uiSize,
-    uint32_t                              iTimeout,
+    int32_t                              iTimeout,
     SALBlockingOption_t                 ulOptions
 );
 
@@ -262,7 +262,7 @@ static SALRetCode_t FR_SemaphoreRelease
 static SALRetCode_t FR_SemaphoreWait
 (
     uint32_t                              uiId,
-    uint32_t                              iTimeout,
+    int32_t                              iTimeout,
     SALBlockingOption_t                 ulOptions
 );
 
@@ -633,13 +633,13 @@ static SALRetCode_t FR_MemCmp
     const void * pMem1,
     const void * pMem2,
     SALSize uiSize,
-    uint32_t * piRetCmp
+    int32_t * piRetCmp
 ) {
     SALRetCode_t retVal = SAL_RET_SUCCESS;
 
     if ((pMem1 != NULL_PTR) && (pMem2 != NULL_PTR) && (uiSize > 0UL) && (piRetCmp != NULL_PTR))
     {
-        *piRetCmp = (uint32_t)memcmp(pMem1, pMem2, (size_t)uiSize);
+        *piRetCmp = (int32_t)memcmp(pMem1, pMem2, (size_t)uiSize);
     }
     else
     {
@@ -711,7 +711,7 @@ static SALRetCode_t FR_StrCmp
 (
     const uint8_t * puc1String,
     const uint8_t * puc2String,
-    uint32_t * piRetCmp
+    int32_t * piRetCmp
 ) {
     SALRetCode_t retVal = SAL_RET_SUCCESS;
 
@@ -750,7 +750,7 @@ static SALRetCode_t FR_StrNCmp
     const uint8_t * puc1String,
     const uint8_t * puc2String,
     SALSize uiLength,
-    uint32_t * piRetCmp
+    int32_t * piRetCmp
 ) {
     SALRetCode_t retVal = SAL_RET_SUCCESS;
 
@@ -763,7 +763,7 @@ static SALRetCode_t FR_StrNCmp
         retVal = FR_ReportError(SAL_DRVID_SAL, 
                                 SAL_API_STR_NCMP,
                                 SAL_ERR_INVALID_PARAMETER, 
-                                (const char *)__FUNCTION__);
+                                __FUNCTION__);
     }
 
     return retVal;
@@ -1041,7 +1041,7 @@ static SALRetCode_t FR_QueuePut
     uint32_t uiId,
     void * pData,
     SALSize uiSize,
-    uint32_t iTimeout,
+    int32_t iTimeout,
     SALBlockingOption_t  ulOptions
 ) {
     SALRetCode_t                    retval = SAL_RET_SUCCESS;
@@ -1379,7 +1379,7 @@ static SALRetCode_t FR_SemaphoreRelease (uint32_t uiId)
 static SALRetCode_t FR_SemaphoreWait
 (
     uint32_t uiId,
-    uint32_t iTimeout,
+    int32_t iTimeout,
     SALBlockingOption_t ulOptions
 ) {
     SALRetCode_t                    retval;

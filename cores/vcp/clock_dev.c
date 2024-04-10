@@ -93,13 +93,13 @@ static void   CLOCK_DevWriteClkCtrl
     uint32_t                              uiSel
 );
 
-static uint32_t CLOCK_DevFindPms
+static int32_t CLOCK_DevFindPms
 (
     CLOCKPms_t*                         psPll,
     uint32_t                              uiSrcFreq
 );
 
-static uint32_t CLOCK_DevSetPllRate
+static int32_t CLOCK_DevSetPllRate
 (
     SALAddr                             uiReg,
     uint32_t                              uiRate
@@ -112,10 +112,10 @@ static uint32_t CLOCK_DevGetPllRate
 
 static uint32_t CLOCK_DevGetPllDiv
 (
-    uint32_t                              iId
+    int32_t                              iId
 );
 
-static uint32_t CLOCK_DevFindClkCtrl
+static int32_t CLOCK_DevFindClkCtrl
 (
     CLOCKClkCtrl_t*                     CLKCTRL
 );
@@ -129,7 +129,7 @@ static uint32_t CLOCK_DevCalPclkDiv
     uint32_t                              uiDivMax
 );
 
-static uint32_t CLOCK_DevFindPclk
+static int32_t CLOCK_DevFindPclk
 (
     CLOCKPclkCtrl_t *                   psPclkCtrl,
     CLOCKPclkCtrlType_t                 eType
@@ -137,7 +137,7 @@ static uint32_t CLOCK_DevFindPclk
 
 static void   CLOCK_DevResetClkSrc
 (
-    uint32_t                              iId
+    int32_t                              iId
 );
 
 /* PLL Configuration Macro */
@@ -346,7 +346,7 @@ static void CLOCK_DevWriteClkCtrl
     }
 }
 
-static uint32_t CLOCK_DevFindPms
+static int32_t CLOCK_DevFindPms
 (
     CLOCKPms_t *                        psPll,
     uint32_t                              uiSrcFreq
@@ -363,7 +363,7 @@ static uint32_t CLOCK_DevFindPms
     uint32_t uiErr;
     uint32_t uiSrchErr;
 
-    uint32_t  iSrchS;
+    int32_t  iSrchS;
 
     if (psPll == NULL)
     {
@@ -382,7 +382,7 @@ static uint32_t CLOCK_DevFindPms
     uiErr       = 0xFFFFFFFFUL;
     uiSrchErr   = 0xFFFFFFFFUL;
 
-    for (iSrchS = (uint32_t)CLOCK_PLL_S_MIN ; iSrchS <= (uint32_t)CLOCK_PLL_S_MAX ; iSrchS++)
+    for (iSrchS = (int32_t)CLOCK_PLL_S_MIN ; iSrchS <= (int32_t)CLOCK_PLL_S_MAX ; iSrchS++)
     {
         ullFvco = ullPll << (uint64_t)iSrchS;
 
@@ -437,7 +437,7 @@ static uint32_t CLOCK_DevFindPms
     return 0;
 }
 
-static uint32_t CLOCK_DevSetPllRate
+static int32_t CLOCK_DevSetPllRate
 (
     SALAddr                             uiReg,
     uint32_t                              uiRate
@@ -445,7 +445,7 @@ static uint32_t CLOCK_DevSetPllRate
 {
     CLOCKPms_t  sPll;
     uint64_t      ullCalM;
-    uint32_t      iErr;
+    int32_t      iErr;
 
     iErr    = 0;
     sPll.uiFpll = uiRate;
@@ -510,7 +510,7 @@ static uint32_t CLOCK_DevGetPllRate
 
 static uint32_t CLOCK_DevGetPllDiv
 (
-    uint32_t                              iId
+    int32_t                              iId
 )
 {
     uint32_t      uiRet;
@@ -609,15 +609,15 @@ static uint32_t CLOCK_DevCalPclkDiv
     return (uiErr1 < uiErr2) ? uiErr1 : uiErr2;
 }
 
-static uint32_t CLOCK_DevFindPclk
+static int32_t CLOCK_DevFindPclk
 (
     CLOCKPclkCtrl_t *                   psPclkCtrl,
     CLOCKPclkCtrlType_t                 eType
 )
 {
-    uint32_t              iRet;
-    uint32_t              iLastIdx;
-    uint32_t              iIdx;
+    int32_t              iRet;
+    int32_t              iLastIdx;
+    int32_t              iIdx;
     uint32_t              uiDivMax;
     uint32_t              uiSrchSrc;
     uint32_t              uiErrDiv;
@@ -641,7 +641,7 @@ static uint32_t CLOCK_DevFindPclk
 
     (void)SAL_MemSet((void *)uiDiv, 0x00U, sizeof(uiDiv));
     uiSrchSrc   = 0xFFFFFFFFUL;
-    iLastIdx    = (uint32_t)CLOCK_SRC_MAX_NUM - 1L;
+    iLastIdx    = (int32_t)CLOCK_SRC_MAX_NUM - 1L;
 
     for (iIdx = iLastIdx ; iIdx >= 0L ; iIdx--)
     {
@@ -750,15 +750,15 @@ static uint32_t CLOCK_DevFindPclk
 
 static void CLOCK_DevResetClkSrc
 (
-    uint32_t                              iId
+    int32_t                              iId
 )
 {
-    if (iId >= (uint32_t)CLOCK_SRC_MAX_NUM)
+    if (iId >= (int32_t)CLOCK_SRC_MAX_NUM)
     {
         return;
     }
 
-    if (iId < (uint32_t)CLOCK_PLL_MAX_NUM)
+    if (iId < (int32_t)CLOCK_PLL_MAX_NUM)
     {
         stMicomClockSource[iId] = CLOCK_GetPllRate(iId);
         stMicomClockSource[CLOCK_PLL_MAX_NUM + iId] = stMicomClockSource[iId] /
@@ -771,8 +771,8 @@ void CLOCK_Init
     void
 )
 {
-    static uint32_t iInitialized = 0;
-    uint32_t iIdx;
+    static int32_t iInitialized = 0;
+    int32_t iIdx;
 
     if (iInitialized == 1L)
     {
@@ -813,7 +813,7 @@ void CLOCK_Init
     //SAL_WriteReg(0x11002522UL, (uint32_t)MCU_BSP_CKC_BASE+(uint32_t)CLOCK_MCKC_CLKCTRL);
 #endif
 
-    for (iIdx = 0L ; iIdx < ((uint32_t)CLOCK_PLL_MAX_NUM * 2L) ; iIdx++)
+    for (iIdx = 0L ; iIdx < ((int32_t)CLOCK_PLL_MAX_NUM * 2L) ; iIdx++)
     {
         stMicomClockSource[iIdx] = 0;
     }
@@ -821,17 +821,17 @@ void CLOCK_Init
     stMicomClockSource[CLOCK_PLL_MAX_NUM * 2]       = (uint32_t)CLOCK_XIN_CLK_RATE;
     stMicomClockSource[(CLOCK_PLL_MAX_NUM * 2) + 1] = 0UL;
 
-    (void)CLOCK_SetPllDiv((uint32_t)CLOCK_MPLL_1, 2);
+    (void)CLOCK_SetPllDiv((int32_t)CLOCK_MPLL_1, 2);
 
-    for (iIdx=0L ; iIdx < (uint32_t)CLOCK_PLL_MAX_NUM ; iIdx++)
+    for (iIdx=0L ; iIdx < (int32_t)CLOCK_PLL_MAX_NUM ; iIdx++)
     {
         CLOCK_DevResetClkSrc(iIdx);
     }
 }
 
-uint32_t CLOCK_SetPllDiv
+int32_t CLOCK_SetPllDiv
 (
-    uint32_t                              iId,
+    int32_t                              iId,
     uint32_t                              uiPllDiv
 )
 {
@@ -893,7 +893,7 @@ uint32_t CLOCK_SetPllDiv
 
 uint32_t CLOCK_GetPllRate
 (
-    uint32_t                              iId
+    int32_t                              iId
 )
 {
     SALAddr     uiReg;
@@ -918,16 +918,16 @@ uint32_t CLOCK_GetPllRate
     return CLOCK_DevGetPllRate(uiReg);
 }
 
-uint32_t CLOCK_SetPllRate
+int32_t CLOCK_SetPllRate
 (
-    uint32_t                              iId,
+    int32_t                              iId,
     uint32_t                              uiRate
 )
 {
     SALAddr             uiReg;
     CLOCKPll_t          uiPllId;
     CLOCKMpclkCtrlSel_t tMpclkSel;
-    uint32_t              iIdx;
+    int32_t              iIdx;
 
     uiReg   = (SALAddr)0;
     uiPllId = (CLOCKPll_t)iId;
@@ -948,19 +948,19 @@ uint32_t CLOCK_SetPllRate
         return -1;
     }
 
-    iIdx = (uint32_t)tMpclkSel;
+    iIdx = (int32_t)tMpclkSel;
     (void)CLOCK_DevSetPllRate(uiReg, uiRate);
     stMicomClockSource[iIdx] = CLOCK_DevGetPllRate(uiReg);
 
     return 0;
 }
 
-static uint32_t CLOCK_DevFindClkCtrl
+static int32_t CLOCK_DevFindClkCtrl
 (
     CLOCKClkCtrl_t *                    CLKCTRL
 )
 {
-    uint32_t iRet;
+    int32_t iRet;
     uint32_t uiIdx;
     uint32_t uiDivTable[CLOCK_SRC_MAX_NUM];
     uint32_t uiErr[CLOCK_SRC_MAX_NUM];
@@ -1153,9 +1153,9 @@ static uint32_t CLOCK_DevFindClkCtrl
     return 0;
 }
 
-uint32_t CLOCK_SetClkCtrlRate
+int32_t CLOCK_SetClkCtrlRate
 (
-    uint32_t                              iId,
+    int32_t                              iId,
     uint32_t                              uiRate
 )
 {
@@ -1188,7 +1188,7 @@ uint32_t CLOCK_SetClkCtrlRate
 
 uint32_t CLOCK_GetClkCtrlRate
 (
-    uint32_t                              iId
+    int32_t                              iId
 )
 {
     SALAddr             uiReg;
@@ -1218,27 +1218,27 @@ uint32_t CLOCK_GetClkCtrlRate
 
         case CLOCK_MCLKCTRL_SEL_PLL0:
         {
-            uiSrcFreq = CLOCK_GetPllRate((uint32_t)CLOCK_PLL_MICOM_0);
+            uiSrcFreq = CLOCK_GetPllRate((int32_t)CLOCK_PLL_MICOM_0);
             break;
         }
 
         case CLOCK_MCLKCTRL_SEL_PLL1:
         {
-            uiSrcFreq = CLOCK_GetPllRate((uint32_t)CLOCK_PLL_MICOM_1);
+            uiSrcFreq = CLOCK_GetPllRate((int32_t)CLOCK_PLL_MICOM_1);
             break;
         }
 
         case CLOCK_MCLKCTRL_SEL_PLL0DIV:
         {
-            uiSrcFreq = CLOCK_GetPllRate((uint32_t)CLOCK_PLL_MICOM_0) /
-                (CLOCK_DevGetPllDiv((uint32_t)CLOCK_PLL_MICOM_0)+1UL);
+            uiSrcFreq = CLOCK_GetPllRate((int32_t)CLOCK_PLL_MICOM_0) /
+                (CLOCK_DevGetPllDiv((int32_t)CLOCK_PLL_MICOM_0)+1UL);
             break;
         }
 
         case CLOCK_MCLKCTRL_SEL_PLL1DIV:
         {
-            uiSrcFreq = CLOCK_GetPllRate((uint32_t)CLOCK_PLL_MICOM_1) /
-                (CLOCK_DevGetPllDiv((uint32_t)CLOCK_PLL_MICOM_1)+1UL);
+            uiSrcFreq = CLOCK_GetPllRate((int32_t)CLOCK_PLL_MICOM_1) /
+                (CLOCK_DevGetPllDiv((int32_t)CLOCK_PLL_MICOM_1)+1UL);
             break;
         }
 
@@ -1262,9 +1262,9 @@ uint32_t CLOCK_GetClkCtrlRate
     return uiRet;
 }
 
-uint32_t CLOCK_IsPeriEnabled
+int32_t CLOCK_IsPeriEnabled
 (
-    uint32_t                              iId
+    int32_t                              iId
 )
 {
     CLOCKPeri_t uiPeriOffset;
@@ -1277,9 +1277,9 @@ uint32_t CLOCK_IsPeriEnabled
     return ((SAL_ReadReg(uiReg) & (1UL << (uint32_t)CLOCK_PCLKCTRL_EN_SHIFT)) != 0UL) ? 1L : 0L;
 }
 
-uint32_t CLOCK_EnablePeri
+int32_t CLOCK_EnablePeri
 (
-    uint32_t                              iId
+    int32_t                              iId
 )
 {
     CLOCKPeri_t uiPeriOffset;
@@ -1293,9 +1293,9 @@ uint32_t CLOCK_EnablePeri
     return 0;
 }
 
-uint32_t CLOCK_DisablePeri
+int32_t CLOCK_DisablePeri
 (
-    uint32_t                              iId
+    int32_t                              iId
 )
 {
     CLOCKPeri_t uiPeriOffset;
@@ -1312,7 +1312,7 @@ uint32_t CLOCK_DisablePeri
 
 uint32_t CLOCK_GetPeriRate
 (
-    uint32_t                              iId
+    int32_t                              iId
 )
 {
     CLOCKPeri_t         uiPeriOffset;
@@ -1337,27 +1337,27 @@ uint32_t CLOCK_GetPeriRate
     {
         case CLOCK_PCLKCTRL_SEL_PLL0:
         {
-            uiSrcFreq = CLOCK_GetPllRate((uint32_t)CLOCK_PLL_MICOM_0);
+            uiSrcFreq = CLOCK_GetPllRate((int32_t)CLOCK_PLL_MICOM_0);
             break;
         }
 
         case CLOCK_PCLKCTRL_SEL_PLL1:
         {
-            uiSrcFreq = CLOCK_GetPllRate((uint32_t)CLOCK_PLL_MICOM_1);
+            uiSrcFreq = CLOCK_GetPllRate((int32_t)CLOCK_PLL_MICOM_1);
             break;
         }
 
         case CLOCK_PCLKCTRL_SEL_PLL0DIV:
         {
-            uiSrcFreq = CLOCK_GetPllRate((uint32_t)CLOCK_PLL_MICOM_0) /
-                (CLOCK_DevGetPllDiv((uint32_t)CLOCK_PLL_MICOM_0) + 1UL);
+            uiSrcFreq = CLOCK_GetPllRate((int32_t)CLOCK_PLL_MICOM_0) /
+                (CLOCK_DevGetPllDiv((int32_t)CLOCK_PLL_MICOM_0) + 1UL);
             break;
         }
 
         case CLOCK_PCLKCTRL_SEL_PLL1DIV:
         {
-            uiSrcFreq = CLOCK_GetPllRate((uint32_t)CLOCK_PLL_MICOM_1) /
-                (CLOCK_DevGetPllDiv((uint32_t)CLOCK_PLL_MICOM_1) + 1UL);
+            uiSrcFreq = CLOCK_GetPllRate((int32_t)CLOCK_PLL_MICOM_1) /
+                (CLOCK_DevGetPllDiv((int32_t)CLOCK_PLL_MICOM_1) + 1UL);
             break;
         }
 
@@ -1387,15 +1387,15 @@ uint32_t CLOCK_GetPeriRate
     return uiRet;
 }
 
-uint32_t CLOCK_SetPeriRate
+int32_t CLOCK_SetPeriRate
 (
-    uint32_t                              iId,
+    int32_t                              iId,
     uint32_t                              uiRate
 )
 {
     CLOCKPeri_t     uiPeriOffset;
     SALAddr         uiReg;
-    uint32_t          iErr;
+    int32_t          iErr;
     CLOCKPclkCtrl_t sPclkCtrl;
 
     uiPeriOffset            = CLOCK_PERI_SFMC;
@@ -1446,26 +1446,26 @@ uint32_t CLOCK_SetPeriRate
     return iErr;
 }
 
-uint32_t CLOCK_IsIobusPwdn
+int32_t CLOCK_IsIobusPwdn
 (
-    uint32_t                              iId
+    int32_t                              iId
 )
 {
     SALAddr         uiReg;
-    uint32_t          iRest;
+    int32_t          iRest;
     CLOCKIobus_t    tIobus;
 
     tIobus  = (CLOCKIobus_t)iId;
 
-    if ((uint32_t)tIobus < (32L * 1L))
+    if ((int32_t)tIobus < (32L * 1L))
     {
         uiReg = (uint32_t)MCU_BSP_SUBSYS_BASE + (uint32_t)CLOCK_MCKC_HCLK0;
     }
-    else if ((uint32_t)tIobus < (32L * 2L))
+    else if ((int32_t)tIobus < (32L * 2L))
     {
         uiReg = (uint32_t)MCU_BSP_SUBSYS_BASE + (uint32_t)CLOCK_MCKC_HCLK1;
     }
-    else if ((uint32_t)tIobus < (32L * 3L))
+    else if ((int32_t)tIobus < (32L * 3L))
     {
         uiReg = (uint32_t)MCU_BSP_SUBSYS_BASE + (uint32_t)CLOCK_MCKC_HCLK2;
     }
@@ -1474,18 +1474,18 @@ uint32_t CLOCK_IsIobusPwdn
         return -1;
     }
 
-    iRest = (uint32_t)tIobus % 32L;
+    iRest = (int32_t)tIobus % 32L;
 
     return ((SAL_ReadReg(uiReg) & ((uint32_t)1UL << (uint32_t)iRest)) != 0UL) ? 0L : 1L;
 }
 
-uint32_t CLOCK_EnableIobus
+int32_t CLOCK_EnableIobus
 (
-    uint32_t                              iId,
+    int32_t                              iId,
     bool                             bEn
 )
 {
-    uint32_t iRet;
+    int32_t iRet;
 
     if(bEn == SALEnabled)
     {
@@ -1513,27 +1513,27 @@ uint32_t CLOCK_EnableIobus
     return iRet;
 }
 
-uint32_t CLOCK_SetIobusPwdn
+int32_t CLOCK_SetIobusPwdn
 (
-    uint32_t                              iId,
+    int32_t                              iId,
     bool                             bEn
 )
 {
     SALAddr         uiReg;
-    uint32_t          iRest;
+    int32_t          iRest;
     CLOCKIobus_t    tIobus;
 
     tIobus  = (CLOCKIobus_t)iId;
 
-    if ((uint32_t)tIobus < (32L * 1L))
+    if ((int32_t)tIobus < (32L * 1L))
     {
         uiReg = (uint32_t)MCU_BSP_SUBSYS_BASE + (uint32_t)CLOCK_MCKC_HCLK0;
     }
-    else if ((uint32_t)tIobus < (32L * 2L))
+    else if ((int32_t)tIobus < (32L * 2L))
     {
         uiReg = (uint32_t)MCU_BSP_SUBSYS_BASE + (uint32_t)CLOCK_MCKC_HCLK1;
     }
-    else if ((uint32_t)tIobus < (32L * 3L))
+    else if ((int32_t)tIobus < (32L * 3L))
     {
         uiReg = (uint32_t)MCU_BSP_SUBSYS_BASE + (uint32_t)CLOCK_MCKC_HCLK2;
     }
@@ -1542,7 +1542,7 @@ uint32_t CLOCK_SetIobusPwdn
         return -1;
     }
 
-    iRest = (uint32_t)tIobus % 32;
+    iRest = (int32_t)tIobus % 32;
 
     if (bEn == SALEnabled)
     {
@@ -1556,27 +1556,27 @@ uint32_t CLOCK_SetIobusPwdn
     return 0;
 }
 
-uint32_t CLOCK_SetSwReset
+int32_t CLOCK_SetSwReset
 (
-    uint32_t                              iId,
+    int32_t                              iId,
     bool                             bReset
 )
 {
     SALAddr         uiReg;
-    uint32_t          iRest;
+    int32_t          iRest;
     CLOCKIobus_t    tIobus;
 
     tIobus  = (CLOCKIobus_t)iId;
 
-    if ((uint32_t)tIobus < (32L * 1L))
+    if ((int32_t)tIobus < (32L * 1L))
     {
         uiReg = (uint32_t)MCU_BSP_SUBSYS_BASE + (uint32_t)CLOCK_MCKC_HCLKSWR0;
     }
-    else if ((uint32_t)tIobus < (32L * 2L))
+    else if ((int32_t)tIobus < (32L * 2L))
     {
         uiReg = (uint32_t)MCU_BSP_SUBSYS_BASE + (uint32_t)CLOCK_MCKC_HCLKSWR1;
     }
-    else if ((uint32_t)tIobus < (32L * 3L))
+    else if ((int32_t)tIobus < (32L * 3L))
     {
         uiReg = (uint32_t)MCU_BSP_SUBSYS_BASE + (uint32_t)CLOCK_MCKC_HCLKSWR2;
     }
@@ -1585,7 +1585,7 @@ uint32_t CLOCK_SetSwReset
         return -1;
     }
 
-    iRest = (uint32_t)tIobus % 32;
+    iRest = (int32_t)tIobus % 32;
 
     if (bReset == SALEnabled)
     {

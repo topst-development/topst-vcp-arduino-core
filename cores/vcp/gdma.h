@@ -151,7 +151,7 @@ typedef struct GDMA_INFORMATION
 ***************************************************************************************************
 */
 
-uint32_t GDMA_Init
+int32_t GDMA_Init
 (
     GDMAInformation_t *                 sDmacon,
     uint32_t                              uiIntPrio

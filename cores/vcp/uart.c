@@ -109,13 +109,13 @@ static SALRetCode_t UART_Reset
     uint8_t                               ucCh
 );
 
-static uint32_t UART_SetGpio
+static int32_t UART_SetGpio
 (
     uint8_t                               ucCh,
     const UartBoardPort_t *             psInfo
 );
 
-static uint32_t UART_SetPortConfig
+static int32_t UART_SetPortConfig
 (
     uint8_t                               ucCh,
     uint32_t                              uiPort
@@ -126,7 +126,7 @@ static SALRetCode_t UART_ClearGpio
     uint8_t                               ucCh
 );
 
-static uint32_t UART_SetChannelConfig
+static int32_t UART_SetChannelConfig
 (
     uint8_t                               ucCh,
     uint32_t                              uiBaud,
@@ -136,7 +136,7 @@ static uint32_t UART_SetChannelConfig
     uint8_t                               ucParity
 );
 
-static uint32_t UART_SetBaudRate
+static int32_t UART_SetBaudRate
 (
     uint8_t                               ucCh,
     uint32_t                              uiBaud
@@ -147,7 +147,7 @@ static void UART_StatusInit
     uint8_t                               ucCh
 );
 
-static uint32_t UART_Probe
+static int32_t UART_Probe
 (
     uint8_t                               ucCh,
     uint32_t                              uiPriority,
@@ -162,18 +162,18 @@ static uint32_t UART_Probe
     GICIsrFunc                          fnCallback
 );
 
-static uint32_t UART_Rx
+static int32_t UART_Rx
 (
     uint8_t                               ucCh
 );
 
-static uint32_t UART_TxChar
+static int32_t UART_TxChar
 (
     uint8_t                               ucCh,
     uint8_t                               cChar
 );
 
-static uint32_t UART_Tx
+static int32_t UART_Tx
 (
     uint8_t                               ucCh
 );
@@ -206,14 +206,14 @@ static void UART_InterruptRxProbe
     uint8_t                               ucCh
 );
 
-static uint32_t UART_InterruptWrite
+static int32_t UART_InterruptWrite
 (
     uint8_t                               ucCh,
     const uint8_t *                       pucBuf,
     uint32_t                              uiSize
 );
 
-static uint32_t UART_InterruptRead
+static int32_t UART_InterruptRead
 (
     uint8_t                               ucCh,
     uint8_t *                             pucBuf,
@@ -232,35 +232,35 @@ static void UART_DmaRxProbe
     uint32_t *                            puiAddr
 );
 
-static uint32_t UART_DmaTxEnable
+static int32_t UART_DmaTxEnable
 (
     uint8_t                               ucCh,
     uint32_t                              uiSize,
     const GDMAInformation_t *           psDmacon
 );
 
-static uint32_t UART_DmaRxEnable
+static int32_t UART_DmaRxEnable
 (
     uint8_t                               ucCh,
     uint32_t                              uiSize,
     const GDMAInformation_t *           psDmacon
 );
 
-static uint32_t UART_DmaWrite
+static int32_t UART_DmaWrite
 (
     uint8_t                               ucCh,
     const uint8_t *                       pucBuf,
     uint32_t                              uiSize
 );
 
-static uint32_t UART_DmaRead
+static int32_t UART_DmaRead
 (
     uint8_t                               ucCh,
     uint8_t *                             pucBuf,
     uint32_t                              uiSize
 );
 
-static uint32_t UART_DmaRxTriggerDma
+static int32_t UART_DmaRxTriggerDma
 (
     uint8_t                               ucCh
 );
@@ -337,16 +337,16 @@ static SALRetCode_t UART_Reset
     uint8_t                               ucCh
 )
 {
-    uint32_t  ret;
-    uint32_t  iClkBusId;
+    int32_t  ret;
+    int32_t  iClkBusId;
 
     ret = 0;
-    iClkBusId   = (uint32_t)CLOCK_IOBUS_UART0 + (uint32_t)ucCh;
+    iClkBusId   = (int32_t)CLOCK_IOBUS_UART0 + (int32_t)ucCh;
 
     /* SW reset */
     ret = CLOCK_SetSwReset(iClkBusId, TRUE);
 
-    if(ret != (uint32_t)NULL)
+    if(ret != (int32_t)NULL)
     {
         return SAL_RET_FAILED;
     }
@@ -354,7 +354,7 @@ static SALRetCode_t UART_Reset
     /* Bit Clear */
     ret = CLOCK_SetSwReset(iClkBusId, FALSE);
 
-    if(ret != (uint32_t)NULL)
+    if(ret != (int32_t)NULL)
     {
         return SAL_RET_FAILED;
     }
@@ -362,13 +362,13 @@ static SALRetCode_t UART_Reset
     return SAL_RET_SUCCESS;
 }
 
-static uint32_t UART_SetGpio
+static int32_t UART_SetGpio
 (
     uint8_t                               ucCh,
     const UartBoardPort_t *             psInfo
 )
 {
-    uint32_t          ret;
+    int32_t          ret;
     SALRetCode_t    ret1;
     SALRetCode_t    ret2;
     SALRetCode_t    ret3;
@@ -448,14 +448,14 @@ static uint32_t UART_SetGpio
     return ret;
 }
 
-static uint32_t UART_SetPortConfig
+static int32_t UART_SetPortConfig
 (
     uint8_t                               ucCh,
     uint32_t                              uiPort
 )
 {
     uint32_t  idx;
-    uint32_t  ret;
+    int32_t  ret;
     static const UartBoardPort_t board_serial[UART_PORT_TBL_SIZE] =
     {
         { 0UL,  GPIO_GPA(28UL),   GPIO_GPA(29UL),   TCC_GPNONE,       TCC_GPNONE,       GPIO_FUNC(1UL),   GPIO_PERICH_CH0 },  // CTL_0, CH_0
@@ -570,7 +570,7 @@ static SALRetCode_t UART_ClearGpio
     return SAL_RET_SUCCESS;
 }
 
-static uint32_t UART_SetChannelConfig
+static int32_t UART_SetChannelConfig
 (
     uint8_t                               ucCh,
     uint32_t                              uiBaud,
@@ -582,14 +582,14 @@ static uint32_t UART_SetChannelConfig
 {
     uint32_t  cr_data = 0;
     uint32_t  lcr_data = 0;
-    uint32_t  ret;
-    uint32_t  iClkBusId;
-    uint32_t  iClkPeriId;
+    int32_t  ret;
+    int32_t  iClkBusId;
+    int32_t  iClkPeriId;
 
     /* Enable the UART controller peri clock */
-    iClkBusId   = (uint32_t)CLOCK_IOBUS_UART0 + (uint32_t)ucCh;
+    iClkBusId   = (int32_t)CLOCK_IOBUS_UART0 + (int32_t)ucCh;
     (void)CLOCK_SetIobusPwdn(iClkBusId, SALDisabled);
-    iClkPeriId  = (uint32_t)CLOCK_PERI_UART0 + (uint32_t)ucCh;
+    iClkPeriId  = (int32_t)CLOCK_PERI_UART0 + (int32_t)ucCh;
     ret         = CLOCK_SetPeriRate(iClkPeriId, UART_DEBUG_CLK);
     (void)CLOCK_EnablePeri(iClkPeriId);
 
@@ -649,7 +649,7 @@ static uint32_t UART_SetChannelConfig
     return ret;
 }
 
-static uint32_t UART_SetBaudRate
+static int32_t UART_SetBaudRate
 (
     uint8_t                               ucCh,
     uint32_t                              uiBaud
@@ -660,7 +660,7 @@ static uint32_t UART_SetBaudRate
     uint32_t  brd_i;
     uint32_t  brd_f;
     uint32_t  pclk;
-    uint32_t  ret;
+    int32_t  ret;
 
     if (ucCh >= UART_CH_MAX)
     {
@@ -670,7 +670,7 @@ static uint32_t UART_SetBaudRate
     else
     {
         // Read the peri clock
-        pclk = CLOCK_GetPeriRate((uint32_t)CLOCK_PERI_UART0 + (uint32_t)ucCh);
+        pclk = CLOCK_GetPeriRate((int32_t)CLOCK_PERI_UART0 + (int32_t)ucCh);
 
         if (pclk == 0UL)
         {
@@ -689,7 +689,7 @@ static uint32_t UART_SetBaudRate
             u32_div = ((((1UL << 3UL) * 16UL) * mod) / (16UL * uiBaud));
             brd_f   = u32_div / 2UL;
             UART_RegWrite(ucCh, UART_REG_FBRD, brd_f);
-            ret = (uint32_t)SAL_RET_SUCCESS;
+            ret = (int32_t)SAL_RET_SUCCESS;
         }
     }
     return ret;
@@ -734,7 +734,7 @@ static void UART_StatusInit
     uart[ucCh].sRxDma.iTransSize        = 0;
 }
 
-static uint32_t UART_Probe
+static int32_t UART_Probe
 (
     uint8_t                               ucCh,
     uint32_t                              uiPriority,
@@ -753,7 +753,7 @@ static uint32_t UART_Probe
     static uint32_t * dma_rx_buf;
     uint32_t          uiDmaRxAddr;
     uint32_t          uiDmaTxAddr;
-    uint32_t          ret;
+    int32_t          ret;
 
     ret = -1;
 
@@ -806,7 +806,7 @@ static uint32_t UART_Probe
     return ret;
 }
 
-static uint32_t UART_Rx
+static int32_t UART_Rx
 (
     uint8_t                               ucCh
 )
@@ -815,7 +815,7 @@ static uint32_t UART_Rx
     uint32_t  max_count;
     uint32_t  data;
     uint8_t * buf;
-    uint32_t  ret;
+    int32_t  ret;
 
     max_count   = UART_BUFF_SIZE;
     buf         = NULL;
@@ -851,19 +851,19 @@ static uint32_t UART_Rx
             max_count--;
         }
 
-        ret = (uint32_t)SAL_RET_SUCCESS;
+        ret = (int32_t)SAL_RET_SUCCESS;
     }
 
     return ret;
 }
 
-static uint32_t UART_TxChar
+static int32_t UART_TxChar
 (
     uint8_t                               ucCh,
     uint8_t                               cChar
 )
 {
-    uint32_t  ret;
+    int32_t  ret;
 
     if (ucCh >= UART_CH_MAX)
     {
@@ -879,20 +879,20 @@ static uint32_t UART_TxChar
         else
         {
             UART_RegWrite(ucCh, UART_REG_DR, cChar);
-            ret = (uint32_t)SAL_RET_SUCCESS;
+            ret = (int32_t)SAL_RET_SUCCESS;
         }
     }
 
     return ret;
 }
 
-static uint32_t UART_Tx
+static int32_t UART_Tx
 (
     uint8_t                               ucCh
 )
 {
     uint8_t * buf;
-    uint32_t  ret;
+    int32_t  ret;
 
     buf = NULL;
 
@@ -928,7 +928,7 @@ static uint32_t UART_Tx
             } while (uart[ucCh].sTxIntr.iHead != uart[ucCh].sTxIntr.iTail);
         }
 
-        ret = (uint32_t)SAL_RET_SUCCESS;
+        ret = (int32_t)SAL_RET_SUCCESS;
     }
 
     return ret;
@@ -1013,7 +1013,7 @@ static void UART_InterruptTxProbe
     if (ucCh < UART_CH_MAX)
     {
         uart[ucCh].sTxIntr.iXmitBuf = uart_buff[ucCh][UART_MODE_TX];
-        uart[ucCh].sTxIntr.iSize    = (uint32_t)UART_BUFF_SIZE;
+        uart[ucCh].sTxIntr.iSize    = (int32_t)UART_BUFF_SIZE;
         uart[ucCh].sTxIntr.iHead    = 0;
         uart[ucCh].sTxIntr.iTail    = 0;
     }
@@ -1027,13 +1027,13 @@ static void UART_InterruptRxProbe
     if (ucCh < UART_CH_MAX)
     {
         uart[ucCh].sRxIntr.iXmitBuf = uart_buff[ucCh][UART_MODE_RX];
-        uart[ucCh].sRxIntr.iSize    = (uint32_t)UART_BUFF_SIZE;
+        uart[ucCh].sRxIntr.iSize    = (int32_t)UART_BUFF_SIZE;
         uart[ucCh].sRxIntr.iHead    = 0;
         uart[ucCh].sRxIntr.iTail    = 0;
     }
 }
 
-static uint32_t UART_InterruptWrite
+static int32_t UART_InterruptWrite
 (
     uint8_t                               ucCh,
     const uint8_t *                       pucBuf,
@@ -1042,7 +1042,7 @@ static uint32_t UART_InterruptWrite
 {
     uint32_t  i;
     uint32_t  imsc;
-    uint32_t  ret;
+    int32_t  ret;
 
     if (pucBuf != NULL_PTR)
     {
@@ -1060,7 +1060,7 @@ static uint32_t UART_InterruptWrite
 
         ret = UART_Tx(ucCh);
 
-        if (ret == (uint32_t)SAL_RET_SUCCESS)
+        if (ret == (int32_t)SAL_RET_SUCCESS)
         {
             imsc = UART_RegRead(ucCh, UART_REG_IMSC);
             imsc |= UART_INT_TXIS;
@@ -1075,16 +1075,16 @@ static uint32_t UART_InterruptWrite
     return ret;
 }
 
-static uint32_t UART_InterruptRead
+static int32_t UART_InterruptRead
 (
     uint8_t                               ucCh,
     uint8_t *                             pucBuf,
     uint32_t                              uiSize
 )
 {
-    uint32_t  cnt;
-    uint32_t  i;
-    uint32_t  ret;
+    int32_t  cnt;
+    int32_t  i;
+    int32_t  ret;
 
     if (ucCh >= UART_CH_MAX)
     {
@@ -1106,9 +1106,9 @@ static uint32_t UART_InterruptRead
             cnt = 0;
         }
 
-        if (cnt > (uint32_t)uiSize)
+        if (cnt > (int32_t)uiSize)
         {
-            cnt = (uint32_t)uiSize;
+            cnt = (int32_t)uiSize;
         }
 
         // copy rx buffer to user buffer
@@ -1196,14 +1196,14 @@ static void UART_DmaRxProbe
     }
 }
 
-static uint32_t UART_DmaTxEnable
+static int32_t UART_DmaTxEnable
 (
     uint8_t                               ucCh,
     uint32_t                              uiSize,
     const GDMAInformation_t *           psDmacon
 )
 {
-    uint32_t  ret;
+    int32_t  ret;
 
     if (ucCh >= UART_CH_MAX)
     {
@@ -1219,20 +1219,20 @@ static uint32_t UART_DmaTxEnable
         GDMA_InterruptEnable(&uart[ucCh].sTxDma);
         GDMA_SetTransferWidth(&uart[ucCh].sTxDma, GDMA_TRANSFER_SIZE_BYTE, GDMA_TRANSFER_SIZE_BYTE);
         GDMA_SetTransferSize(&uart[ucCh].sTxDma, uiSize);
-        ret = (uint32_t)SAL_RET_SUCCESS;
+        ret = (int32_t)SAL_RET_SUCCESS;
     }
 
     return ret;
 }
 
-static uint32_t UART_DmaRxEnable
+static int32_t UART_DmaRxEnable
 (
     uint8_t                               ucCh,
     uint32_t                              uiSize,
     const GDMAInformation_t *           psDmacon
 )
 {
-    uint32_t  ret;
+    int32_t  ret;
 
     if (ucCh >= UART_CH_MAX)
     {
@@ -1251,13 +1251,13 @@ static uint32_t UART_DmaRxEnable
 
         // Run DMA
         GDMA_ChannelEnable(&uart[ucCh].sRxDma);
-        ret = (uint32_t)SAL_RET_SUCCESS;
+        ret = (int32_t)SAL_RET_SUCCESS;
     }
 
     return ret;
 }
 
-static uint32_t UART_DmaWrite
+static int32_t UART_DmaWrite
 (
     uint8_t                               ucCh,
     const uint8_t *                       pucBuf,
@@ -1265,7 +1265,7 @@ static uint32_t UART_DmaWrite
 )
 {
     uint32_t  i;
-    uint32_t  ret;
+    int32_t  ret;
 
     if (ucCh >= UART_CH_MAX)
     {
@@ -1293,14 +1293,14 @@ static uint32_t UART_DmaWrite
 
             // Run DMA
             GDMA_ChannelEnable(&uart[ucCh].sTxDma);
-            ret = (uint32_t)SAL_RET_SUCCESS;
+            ret = (int32_t)SAL_RET_SUCCESS;
         }
     }
 
     return ret;
 }
 
-static uint32_t UART_DmaRead
+static int32_t UART_DmaRead
 (
     uint8_t                               ucCh,
     uint8_t *                             pucBuf,
@@ -1314,7 +1314,7 @@ static uint32_t UART_DmaRead
     uint32_t  prev_buf;
     uint32_t  c_size;
     uint32_t  u_size;
-    uint32_t  ret;
+    int32_t  ret;
 
     cnt         = 0;
     post_cnt    = 0;
@@ -1358,7 +1358,7 @@ static uint32_t UART_DmaRead
                     uart[ucCh].sRxDma.iTransSize -=  u_size;
                     cnt = u_size;
                 }
-                ret = (uint32_t)cnt;
+                ret = (int32_t)cnt;
             }
             else if(c_size > uart[ucCh].sRxDma.iTransSize)
             {
@@ -1409,7 +1409,7 @@ static uint32_t UART_DmaRead
                     cnt = u_size;
                 }
 
-                ret = (uint32_t)cnt;
+                ret = (int32_t)cnt;
             }
             else
             {
@@ -1425,14 +1425,14 @@ static uint32_t UART_DmaRead
     return ret;
 }
 
-static uint32_t UART_DmaRxTriggerDma
+static int32_t UART_DmaRxTriggerDma
 (
     uint8_t                               ucCh
 )
 {
     uint32_t  dmacr;
     uint32_t  im;
-    uint32_t  ret;
+    int32_t  ret;
 
     if (ucCh >= UART_CH_MAX)
     {
@@ -1449,7 +1449,7 @@ static uint32_t UART_DmaRxTriggerDma
         im |= ~UART_INT_RXIS;
         UART_RegWrite(ucCh, UART_REG_IMSC, im);
 
-        ret = (uint32_t)SAL_RET_SUCCESS;
+        ret = (int32_t)SAL_RET_SUCCESS;
     }
 
     return ret;
@@ -1473,7 +1473,7 @@ static void UART_DmaRxISR(void * pArg)
 ***************************************************************************************************
 */
 
-uint32_t UART_Open
+int32_t UART_Open
 (
     uint8_t                               ucCh,
     uint32_t                              uiPriority,     // Interrupt Priority
@@ -1488,7 +1488,7 @@ uint32_t UART_Open
     GICIsrFunc                          fnCallback      // callback function
 )
 {
-    uint32_t          ret = -1;
+    int32_t          ret = -1;
 
     UART_StatusInit(ucCh);
 
@@ -1510,7 +1510,7 @@ void UART_Close
     uint8_t                              ucCh
 )
 {
-    uint32_t          iClkBusId;
+    int32_t          iClkBusId;
     SALRetCode_t    ret;
 
     if (ucCh < UART_CH_MAX)
@@ -1519,13 +1519,13 @@ void UART_Close
         UART_DisableInterrupt(ucCh);
 
         /* Disable the UART controller Bus clock */
-        iClkBusId   = (uint32_t)CLOCK_IOBUS_UART0 + (uint32_t)ucCh;
+        iClkBusId   = (int32_t)CLOCK_IOBUS_UART0 + (int32_t)ucCh;
         (void)CLOCK_SetIobusPwdn(iClkBusId, TRUE);
 
         if (uart[ucCh].sOpMode == UART_DMA_MODE)
         {
             /* Disable the UDMA controller Bus clock */
-            iClkBusId   = (uint32_t)CLOCK_IOBUS_DMA_CON0 + (uint32_t)ucCh;
+            iClkBusId   = (int32_t)CLOCK_IOBUS_DMA_CON0 + (int32_t)ucCh;
             (void)CLOCK_SetIobusPwdn(iClkBusId, TRUE);
         }
 
@@ -1558,7 +1558,7 @@ void UART_Close
     }
 }
 
-uint32_t UART_Read
+int32_t UART_Read
 (
     uint8_t                               ucCh,
     uint8_t *                             pucBuf,
@@ -1566,7 +1566,7 @@ uint32_t UART_Read
 )
 {
     uint32_t  i;
-    uint32_t  ret;
+    int32_t  ret;
     int8_t   getc_err;
 
     ret = -1;
@@ -1600,7 +1600,7 @@ uint32_t UART_Read
                     }
                     else
                     {
-                        ret = (uint32_t)i;
+                        ret = (int32_t)i;
                         break;
                     }
                 }
@@ -1611,7 +1611,7 @@ uint32_t UART_Read
     return ret;
 }
 
-uint32_t UART_Write
+int32_t UART_Write
 (
     uint8_t                               ucCh,
     const uint8_t *                       pucBuf,
@@ -1619,7 +1619,7 @@ uint32_t UART_Write
 )
 {
     uint32_t  i;
-    uint32_t  ret;
+    int32_t  ret;
 
     ret = -1;
 
@@ -1658,14 +1658,14 @@ uint32_t UART_Write
 uint32_t UART_GetData
 (
     uint8_t                               ucCh,
-    uint32_t                              iWait,
+    int32_t                              iWait,
     int8_t *                             pcErr
 )
 {
     /* Use for Lin */
     uint32_t  data;
     uint32_t  ret;
-    uint32_t  timeout;
+    int32_t  timeout;
 
     data    = 0;
     ret     = 0;
@@ -1702,15 +1702,15 @@ uint32_t UART_GetData
     return ret;
 }
 
-uint32_t UART_GetChar
+int32_t UART_GetChar
 (
     uint8_t                               ucCh,
-    uint32_t                              iWait,
+    int32_t                              iWait,
     int8_t *                             pcErr
 )
 {
     uint32_t  data;
-    uint32_t  ret;
+    int32_t  ret;
 
     ret = -1;
 
@@ -1733,7 +1733,7 @@ uint32_t UART_GetChar
                     }
                 }
                 data    = UART_RegRead(ucCh, UART_REG_DR);
-                ret     = (uint32_t) data;
+                ret     = (int32_t) data;
             }
             else
             {
@@ -1744,7 +1744,7 @@ uint32_t UART_GetChar
                 else
                 {
                     data    = UART_RegRead(ucCh, UART_REG_DR);
-                    ret     = (uint32_t) data;
+                    ret     = (int32_t) data;
                 }
             }
         }
@@ -1753,13 +1753,13 @@ uint32_t UART_GetChar
     return ret;
 }
 
-uint32_t UART_PutChar
+int32_t UART_PutChar
 (
     uint8_t                               ucCh,
     uint8_t                               ucChar
 )
 {
-    uint32_t  ret;
+    int32_t  ret;
 
     ret = -1;
 
@@ -1778,7 +1778,7 @@ uint32_t UART_PutChar
         }
 
         UART_RegWrite(ucCh, UART_REG_DR, ucChar);
-        ret = (uint32_t)SAL_RET_SUCCESS;
+        ret = (int32_t)SAL_RET_SUCCESS;
     }
 
     return ret;
@@ -1866,10 +1866,10 @@ void UART_ISR
     UartStatus_t *  uartStat;
     uint32_t          status;
     uint32_t          imsc;
-    uint32_t          max_count;
+    int32_t          max_count;
 
     uartStat    = pArg;
-    max_count   = (uint32_t)UART_BUFF_SIZE;
+    max_count   = (int32_t)UART_BUFF_SIZE;
 
     if (uartStat != NULL_PTR)
     {

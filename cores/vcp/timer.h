@@ -96,7 +96,7 @@ typedef enum TIMEROperationMode
 
 } TIMEROpMode_t;
 
-typedef uint32_t                          (* TIMERHandler)(TIMERChannel_t uiChannel, void * pArgs);
+typedef int32_t                          (* TIMERHandler)(TIMERChannel_t uiChannel, void * pArgs);
 
 typedef struct TIMERCfgTable
 {

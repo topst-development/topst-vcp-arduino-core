@@ -97,9 +97,9 @@
 typedef struct UART_INTERRUPT_DATA
 {
     uint8_t *                             iXmitBuf;
-    uint32_t                              iHead;
-    uint32_t                              iTail;
-    uint32_t                              iSize;
+    int32_t                              iHead;
+    int32_t                              iTail;
+    int32_t                              iSize;
 } UartInterruptData_t;
 
 typedef struct UART_BOARD_PORT

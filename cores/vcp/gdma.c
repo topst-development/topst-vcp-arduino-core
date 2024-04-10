@@ -338,12 +338,12 @@ SALRetCode_t GDMA_Reset
     uint8_t                               ucCon
 )
 {
-    uint32_t  ret = (uint32_t)SAL_RET_SUCCESS;
-    uint32_t  iClkBusId;
+    int32_t  ret = (int32_t)SAL_RET_SUCCESS;
+    int32_t  iClkBusId;
 
     if ( ucCon < GDMA_CON_MAX)
     {
-        iClkBusId   = (uint32_t)CLOCK_IOBUS_DMA_CON0 + (uint32_t)ucCon;
+        iClkBusId   = (int32_t)CLOCK_IOBUS_DMA_CON0 + (int32_t)ucCon;
 
         /* SW reset */
         (void)CLOCK_SetSwReset(iClkBusId, TRUE);
@@ -354,7 +354,7 @@ SALRetCode_t GDMA_Reset
     }
     else
     {
-            ret = (uint32_t)SAL_RET_FAILED;
+            ret = (int32_t)SAL_RET_FAILED;
     }
 
     return (SALRetCode_t)ret;
@@ -706,16 +706,16 @@ void GDMA_TransferMem2Mem
     }
 }
 
-uint32_t GDMA_Init
+int32_t GDMA_Init
 (
     GDMAInformation_t *                 sDmacon,
     uint32_t                              uiIntPrio
 )
 {
-    uint32_t ret;
+    int32_t ret;
     uint32_t uiAddr;
     uint32_t uiValue;
-    uint32_t iClkId;
+    int32_t iClkId;
     static GDMAController_t gdma_con_table[GDMA_CON_MAX] =
     {
         {0UL, {NULL, NULL}},
@@ -733,7 +733,7 @@ uint32_t GDMA_Init
 
     if (sDmacon != NULL_PTR)
     {
-        iClkId = (uint32_t)CLOCK_IOBUS_DMA_CON0 + (uint32_t)sDmacon->iCon;
+        iClkId = (int32_t)CLOCK_IOBUS_DMA_CON0 + (int32_t)sDmacon->iCon;
         (void)CLOCK_EnableIobus(iClkId, SALEnabled);
 
         gdma_con_table[sDmacon->iCon].cController       = sDmacon->iCon;
@@ -761,7 +761,7 @@ uint32_t GDMA_Init
             //ret = (int32_t)SAL_RET_SUCCESS;
             //uiGDMAEnabled = 1UL; // 2 ch per 8 controller
         }
-		ret = (uint32_t)SAL_RET_SUCCESS;
+		ret = (int32_t)SAL_RET_SUCCESS;
     }
     else
     {

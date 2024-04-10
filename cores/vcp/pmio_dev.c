@@ -267,7 +267,7 @@ static void PMIO_SetTimer
     uint32_t                          uiUsec
 );
 
-static uint32_t PMIO_TimeoutInterruptHandler
+static int32_t PMIO_TimeoutInterruptHandler
 (
     TIMERChannel_t                  iChannel,
     void *                          pArgs
@@ -1140,7 +1140,7 @@ void PMIO_SetTimer
         (void) TIMER_Disable((TIMERChannel_t)PMIO_VA_TIMER_CH);
     }
 }
-static uint32_t PMIO_TimeoutInterruptHandler
+static int32_t PMIO_TimeoutInterruptHandler
 (
     TIMERChannel_t                      iChannel,
     void *                              pArgs
@@ -1159,7 +1159,7 @@ static uint32_t PMIO_TimeoutInterruptHandler
     {
         PMIO_D("TimerIntr fail null or mismatched ch %d\n", (uint32_t)iChannel);
     }
-    return (uint32_t)SAL_RET_SUCCESS;
+    return (int32_t)SAL_RET_SUCCESS;
 }
 
 void PMIO_SetNotiGpkIrq

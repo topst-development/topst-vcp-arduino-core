@@ -68,7 +68,6 @@ static SALFileFunc_t                    gFileTable;
 static SALDataStructFunc_t              gDataStructTable;
 static SALSyncObjectFunc_t              gSyncObjectTable;
 static SALTaskFunc_t                    gTaskTable;
-static SALSocketFunc_t                  gSocketTable;
 static SALTraceFunc_t                   gTraceTable;
 static SALEtcFunc_t                     gEtcTable;
 
@@ -79,7 +78,6 @@ SALFileFunc_t *                         gSALFileTable = &gFileTable;
 SALDataStructFunc_t *                   gSALDataStructTable = &gDataStructTable;
 SALSyncObjectFunc_t *                   gSALSyncObjectTable = &gSyncObjectTable;
 SALTaskFunc_t *                         gSALTaskTable = &gTaskTable;
-SALSocketFunc_t *                       gSALSocketTable = &gSocketTable;
 SALTraceFunc_t *                        gSALTraceTable = &gTraceTable;
 SALEtcFunc_t *                          gSALEtcTable = &gEtcTable;
 

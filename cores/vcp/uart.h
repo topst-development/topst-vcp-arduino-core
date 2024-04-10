@@ -155,7 +155,7 @@ enum
 ***************************************************************************************************
 */
 
-uint32_t UART_Open
+int32_t UART_Open
 (
     uint8_t                               ucCh,
     uint32_t                              uiPriority,     // Interrupt priority
@@ -175,14 +175,14 @@ void UART_Close
     uint8_t                               ucCh
 );
 
-uint32_t UART_Read
+int32_t UART_Read
 (
     uint8_t                               ucCh,
     uint8_t                               *pucBuf,
     uint32_t                              uiSize
 );
 
-uint32_t UART_Write
+int32_t UART_Write
 (
     uint8_t                               ucCh,
     const uint8_t                         *pucBuf,
@@ -192,18 +192,18 @@ uint32_t UART_Write
 uint32_t UART_GetData
 (
     uint8_t                               ucCh,
-    uint32_t                              iWait,
+    int32_t                              iWait,
     int8_t                               *pcErr
 );
 
-uint32_t UART_GetChar
+int32_t UART_GetChar
 (
     uint8_t                               ucCh,
-    uint32_t                              iWait,
+    int32_t                              iWait,
     int8_t                               *pcErr
 );
 
-uint32_t UART_PutChar
+int32_t UART_PutChar
 (
     uint8_t                               ucCh,
     uint8_t                               ucChar

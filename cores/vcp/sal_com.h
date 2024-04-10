@@ -347,10 +347,10 @@ typedef SALRetCode_t                    (*SALMemCalloc) (void * pMem, uint32_t u
 typedef SALRetCode_t                    (*SALMemFree) (void * pMem);
 typedef SALRetCode_t                    (*SALMemSet) (void * pMem, uint8_t ucValue, SALSize uiSize);
 typedef SALRetCode_t                    (*SALMemCopy) (void * pDest, const void * pSrc, SALSize uiSize);
-typedef SALRetCode_t                    (*SALMemCmp) (const void * pMem1, const void * pMem2, SALSize uiSize, uint32_t * piRetCmp);
+typedef SALRetCode_t                    (*SALMemCmp) (const void * pMem1, const void * pMem2, SALSize uiSize, int32_t * piRetCmp);
 typedef SALRetCode_t                    (*SALStrCopy) (uint8_t * pucDestString, const uint8_t * pucSrcString);
-typedef SALRetCode_t                    (*SALStrCmp) (const uint8_t * puc1String, const uint8_t * puc2String, uint32_t * piRetCmp);
-typedef SALRetCode_t                    (*SALStrNCmp) (const uint8_t * puc1String, const uint8_t * puc2String, SALSize uiLength, uint32_t * piRetCmp);
+typedef SALRetCode_t                    (*SALStrCmp) (const uint8_t * puc1String, const uint8_t * puc2String, int32_t * piRetCmp);
+typedef SALRetCode_t                    (*SALStrNCmp) (const uint8_t * puc1String, const uint8_t * puc2String, SALSize uiLength, int32_t * piRetCmp);
 typedef SALRetCode_t                    (*SALStrLength) (const int8_t * pucString, SALSize * puiLength);
 
 /* File / Directory */
@@ -376,7 +376,7 @@ typedef SALRetCode_t                    (*SALFileFreeDiskSpaceEx) (int8_t * pcRo
 typedef SALRetCode_t                    (*SALQueueCreate) (uint32_t * puiId, const uint8_t * pucName, uint32_t uiDepth, SALSize uiDataSize);
 typedef SALRetCode_t                    (*SALQueueDelete) (uint32_t uiId);
 typedef SALRetCode_t                    (*SALQueueGet) (uint32_t uiId, void * pData, uint32_t * puiSizeCopied, uint32_t iTimeout, SALBlockingOption_t  ulOptions);
-typedef SALRetCode_t                    (*SALQueuePut) (uint32_t uiId, void * pData, SALSize uiSize, uint32_t iTimeout, SALBlockingOption_t  ulOptions);
+typedef SALRetCode_t                    (*SALQueuePut) (uint32_t uiId, void * pData, SALSize uiSize, int32_t iTimeout, SALBlockingOption_t  ulOptions);
 
 /* Event */
 typedef SALRetCode_t                    (*SALEventCreate) (uint32_t * puiId, const uint8_t * pucName, uint32_t uiInitialValue);
@@ -394,7 +394,7 @@ typedef SALRetCode_t                    (*SALMutexUnlock) (uint32_t uiId);
 typedef SALRetCode_t                    (*SALSemaphoreCreate) (uint32_t * puiId, const uint8_t * pucName, uint32_t uiInitialValue, SALBlockingOption_t ulOptions);
 typedef SALRetCode_t                    (*SALSemaphoreDelete) (uint32_t uiId);
 typedef SALRetCode_t                    (*SALSemaphoreRelease) (uint32_t uiId);
-typedef SALRetCode_t                    (*SALSemaphoreWait) (uint32_t uiId, uint32_t iTimeout, SALBlockingOption_t ulOptions);
+typedef SALRetCode_t                    (*SALSemaphoreWait) (uint32_t uiId, int32_t iTimeout, SALBlockingOption_t ulOptions);
 
 /* Task */
 typedef SALRetCode_t                    (*SALTaskCreate) (uint32_t * puiTaskId, const uint8_t * pucTaskName, SALTaskFunc fnTask, uint32_t * puiStackPtr, uint32_t uiStackSize, SALTaskPriority_t uiPriority, void * pTaskParam);
