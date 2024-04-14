@@ -84,7 +84,7 @@ SECTIONS
   .text :
   {
   	__TEXT_START__ = .;
-    *startup.o (.text)
+    *startup.S.o (.text)
     *(.text)
     __TEXT_END__ = .;
     . = ALIGN(4);
@@ -109,7 +109,7 @@ SECTIONS
   {
   	__VECTOR_START_LOAD = LOADADDR (.vector);
   	__VECTOR_START__ = .;
-    *vector.o (.vector .text .rodata .rodata*)
+    *vector.S.o (.vector .text .rodata .rodata*)
     . = ALIGN(0x20);
     __VECTOR_END__ = .;
   } > SRAM AT > REMAP_FLASH

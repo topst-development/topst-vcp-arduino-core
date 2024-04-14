@@ -250,7 +250,7 @@ typedef enum SALEventOption
  */
 typedef enum SALTaskPriority
 {
-    SAL_PRIO_TOPST_APP                   = 1,  /**< TOST APP task                        */
+    SAL_PRIO_ARDUINO_APP                   = 1,  /**< TOST APP task                        */
     SAL_PRIO_APP_CFG                    = 2,  /**< APP TASK START task                  */
     SAL_PRIO_POWER_MANAGER              = 3,  /**< Power Manager APP task               */
     SAL_PRIO_IPC_CONTROL                = 3,  /**< IPC Control task                     */

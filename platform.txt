@@ -39,7 +39,7 @@ compiler.cpp.flags={compiler.extra_flags} -c {build.flags.optimize} {compiler.wa
 
 compiler.ar.flags=rcs
 
-compiler.c.elf.flags=-mcpu={build.mcu} {build.flags.fp} -mthumb {build.flags.optimize} {build.flags.ldspecs} -Wl,--gc-sections -Wl,--unresolved-symbols=report-all -Wl,--warn-common
+compiler.c.elf.flags=-mcpu={build.mcu} {build.flags.fp} {build.flags.optimize} {build.flags.ldspecs} -Wl,--gc-sections -Wl,--unresolved-symbols=report-all -Wl,--warn-common -lnosys
 
 compiler.objcopy.eep.flags=-O ihex -j .eeprom --set-section-flags=.eeprom=alloc,load --no-change-warnings --change-section-lma .eeprom=0
 

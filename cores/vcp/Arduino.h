@@ -29,7 +29,7 @@
 extern "C" {
 #endif
 
-#include "variant.h"
+// #include "variant.h"
 
 // Standard Arduino data types
 typedef uint8_t byte;

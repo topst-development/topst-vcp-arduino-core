@@ -56,6 +56,8 @@
 /* medium measn that task has some fucnction call or small local variables/arrays   */
 #define ACFG_TASK_MEDIUM_STK_SIZE       (256U)
 
+#define ARDUINO_APP_TASK_STK_SIZE 1024U
+
 /* Sample Application                                                               */
 /* Key(ADC+Rotary) manager applicaiton                                              */
 #define ACFG_APP_KEY_EN                 (0)
