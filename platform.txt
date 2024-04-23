@@ -108,6 +108,11 @@ recipe.objcopy.bin.pattern="{compiler.path}{compiler.objcopy.cmd}" {compiler.elf
 ## Create output (.hex file)
 recipe.objcopy.hex.pattern="{compiler.path}{compiler.objcopy.cmd}" {compiler.elf2hex.flags} {compiler.elf2hex.extra_flags} "{build.path}/{build.project_name}.elf" "{build.path}/{build.project_name}.hex"
 
+## convert file to telechips VCP preferred_out_format
+# recipe.hooks.objcopy.postobjcopy.1.pattern=echo "{build.source.path}"
+recipe.hooks.objcopy.postobjcopy.1.pattern="{build.source.path}/tcmktool" "{build.path}/{build.project_name}.bin" "{build.path}/r5_fw.rom" R5-FW 0.0.0 0x00000000 70xx
+recipe.hooks.objcopy.postobjcopy.2.pattern="{build.source.path}/tcc70xx-pflash-mkimage" -i "{build.source.path}/tcc70xx.cfg" -o tcc70xx_pflash_boot.rom
+
 build.preferred_out_format=bin
 
 ## Save binary
@@ -120,21 +125,4 @@ recipe.size.regex=^(?:\.text|\.data|\.rodata)\s+([0-9]+).*
 recipe.size.regex.data=^(?:\.data|\.bss|\.noinit)\s+([0-9]+).*
 recipe.size.regex.eeprom=^(?:\.eeprom)\s+([0-9]+).*
 
-# Upload using Maple bootloader over DFU
-tools.maple_upload.cmd=maple_upload.sh
-tools.maple_upload.cmd.windows=maple_upload.bat
-tools.maple_upload.path={runtime.tools.STM32Tools.path}/win
-tools.maple_upload.path.macosx={runtime.tools.STM32Tools.path}/macosx
-tools.maple_upload.path.linux={runtime.tools.STM32Tools.path}/linux
-tools.maple_upload.upload.params.verbose=-d
-tools.maple_upload.upload.params.quiet=n
-tools.maple_upload.upload.pattern="{path}/{cmd}" {serial.port.file} {upload.altID} {upload.usbID} "{build.path}/{build.project_name}.bin"
 
-# STM32MP1 self-contained shell script
-tools.remoteproc_gen.path={runtime.tools.STM32Tools.path}
-tools.remoteproc_gen.busybox=
-tools.remoteproc_gen.busybox.windows={path}/win/busybox.exe
-tools.remoteproc_gen.script=run_arduino_gen.sh
-tools.remoteproc_gen.upload.params.verbose=
-tools.remoteproc_gen.upload.params.quiet=
-tools.remoteproc_gen.upload.pattern="{busybox}" sh "{path}/{script}" generate "{build.path}/{build.project_name}.elf" "{build.path}/run_arduino_{build.project_name}.sh"
