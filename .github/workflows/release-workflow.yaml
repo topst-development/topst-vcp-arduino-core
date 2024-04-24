@@ -1,21 +1,19 @@
 name: Release Workflow
 
 on:
-  release:
-    types: [created]
-
+  push:
+    tags:
+      - 'v*'
+permissions:
+  contents: write
+  actions: read
+  
 jobs:
-  build:
+  create_release:
     runs-on: ubuntu-latest
-
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
-
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.x'  # Set the Python version as required
+      uses: actions/checkout@v3
 
     - name: Install dependencies
       run: |
@@ -23,15 +21,18 @@ jobs:
         sudo apt-get install -y bzip2 tar
 
     - name: Prepare files
-      run: | # release version with tag name
-        tar -cjvf release-files.tar.bz2 --exclude='.git' --exclude='.github' .
+      run: |
+        tar cjvf release-files.tar.bz2 --exclude='.git' --exclude='.github' ./*
 
-    - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1
+    - name: Create SHA256 file
+      run: |
+        shasum -a 256 release-files.tar.bz2  > SHA256.txt
+        
+    - name: Create Release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: |
+          release-files.tar.bz2
+          SHA256.txt
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_path: ./release-files.tar.bz2
-        asset_name: release-files.tar.bz2
-        asset_content_type: application/x-bzip2
