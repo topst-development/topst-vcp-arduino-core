@@ -39,6 +39,9 @@ typedef bool boolean;
 #define DEFAULT 1
 #define EXTERNAL 0
 
+#include "pins_arduino.h"
+#include "wiring.h"
+
 void yield( void ) ;
 
 /* system functions */
