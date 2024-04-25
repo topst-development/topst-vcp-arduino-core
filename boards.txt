@@ -17,3 +17,4 @@ vcp.build.variant=vcp
 vcp.build.board=vcp
 vcp.build.ldscript=linker_scripts/linker_512.ld
 vcp.upload.tool.default=fwdn
+vcp.upload.tool=fwdn
