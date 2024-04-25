@@ -109,15 +109,10 @@ recipe.objcopy.bin.pattern="{compiler.path}{compiler.objcopy.cmd}" {compiler.elf
 recipe.objcopy.hex.pattern="{compiler.path}{compiler.objcopy.cmd}" {compiler.elf2hex.flags} {compiler.elf2hex.extra_flags} "{build.path}/{build.project_name}.elf" "{build.path}/{build.project_name}.hex"
 
 ## convert file to telechips VCP preferred_out_format
-# recipe.hooks.objcopy.postobjcopy.1.pattern=echo "{build.source.path}"
-recipe.hooks.objcopy.postobjcopy.1.pattern="{build.source.path}/tcmktool" "{build.path}/{build.project_name}.bin" "{build.path}/r5_fw.rom" R5-FW 0.0.0 0x00000000 70xx
-recipe.hooks.objcopy.postobjcopy.2.pattern="{build.source.path}/tcc70xx-pflash-mkimage" -i "{build.source.path}/tcc70xx.cfg" -o tcc70xx_pflash_boot.rom
-
-build.preferred_out_format=bin
-
-## convert file to telechips VCP preferred_out_format
 recipe.hooks.objcopy.postobjcopy.1.pattern.windows="{runtime.tools.vcp-tools.path}/tcmk-convert.exe" "{build.path}/{build.project_name}.bin" "{build.path}/{build.project_name}.rom"
 recipe.hooks.objcopy.postobjcopy.1.pattern.linux="python3" "{runtime.tools.vcp-tools.path}/main.py" "{build.path}/{build.project_name}.bin" "{build.path}/{build.project_name}.rom"
+
+build.preferred_out_format=bin
 
 ## Save binary
 recipe.output.tmp_file={build.project_name}.{build.preferred_out_format}
@@ -130,3 +125,12 @@ recipe.size.regex.data=^(?:\.data|\.bss|\.noinit)\s+([0-9]+).*
 recipe.size.regex.eeprom=^(?:\.eeprom)\s+([0-9]+).*
 
 
+tools.fwdn.path={runtime.tools.vcp-tools.path}
+tools.fwdn.cmd.linux=fwdn
+tools.fwdn.cmd.windows=fwdn.exe
+
+tools.fwdn.program.params.verbose=
+tools.fwdn.program.params.quiet=
+tools.fwdn.program.pattern_args=-w "{build.path}/{build.project_name}.rom" --fwdn "{path}/vcp_fwdn.rom" --port "{serial.port}"
+tools.fwdn.program.pattern.windows="{path}/{cmd}" {program.pattern_args}
+tools.fwdn.program.pattern.linux="{path}/{cmd}" {program.pattern_args}

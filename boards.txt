@@ -16,4 +16,4 @@ vcp.build.variant=vcp
 # build.board is passed to the build system as -DBOARD_NAME=\"vcp\"
 vcp.build.board=vcp
 vcp.build.ldscript=linker_scripts/linker_512.ld
-
+vcp.upload.tool.default=fwdn
