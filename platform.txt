@@ -115,6 +115,10 @@ recipe.hooks.objcopy.postobjcopy.2.pattern="{build.source.path}/tcc70xx-pflash-m
 
 build.preferred_out_format=bin
 
+## convert file to telechips VCP preferred_out_format
+recipe.hooks.objcopy.postobjcopy.1.pattern.windows="{runtime.tools.vcp-tools.path}/tcmk-convert.exe" "{build.path}/{build.project_name}.bin" "{build.path}/{build.project_name}.rom"
+recipe.hooks.objcopy.postobjcopy.1.pattern.linux="python3" "{runtime.tools.vcp-tools.path}/main.py" "{build.path}/{build.project_name}.bin" "{build.path}/{build.project_name}.rom"
+
 ## Save binary
 recipe.output.tmp_file={build.project_name}.{build.preferred_out_format}
 recipe.output.save_file={build.project_name}.{build.board}.{build.preferred_out_format}
