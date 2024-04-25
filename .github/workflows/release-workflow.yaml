@@ -28,13 +28,17 @@ jobs:
 
     - name: Create SHA256 file
       run: |
-        shasum -a 256 release-files.tar.bz2  > SHA256.txt
-        
+        shasum -a 256 release-files.tar.bz2  | awk '{print $1}' | tee > release-files.tar.bz2.sha256
+
+    - name: Print out the size of the release file
+      run: |
+        stat --printf="%s\n" release-files.tar.bz2
+
     - name: Create Release
       uses: softprops/action-gh-release@v2
       with:
         files: |
           release-files.tar.bz2
-          SHA256.txt
+          release-files.tar.bz2.sha256
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
