@@ -55,12 +55,12 @@ static int32_t Timer_MainHandler(TIMERChannel_t iChannel, void * args)
 
     if (uiCnt++ % 2 == 0) {
         // LED Off
-        (void)GPIO_Set(GPIO_GPK(16UL), 1UL);
+        //(void)GPIO_Set(GPIO_GPK(16UL), 1UL);
     }
     else
     {
         // LED On
-        (void)GPIO_Set(GPIO_GPK(16UL), 0UL);
+        //(void)GPIO_Set(GPIO_GPK(16UL), 0UL);
     }
 
     return 0;
@@ -70,7 +70,7 @@ static void ArduinoAppTask(void *pArg)
 {
     (void)pArg;
     #if defined(ARDUINO)
-    //setup();
+    setup(); //hsj
     #endif
     uint8_t ucAccSwitchStatus;
     uint8_t ucILLISwitchStatus;
@@ -120,7 +120,7 @@ static void ArduinoAppTask(void *pArg)
     while(1)
     {
         #if defined(ARDUINO)
-        //loop();
+        loop(); //hsj
         #endif
         SAL_TaskSleep(0);
     }
