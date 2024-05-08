@@ -26,7 +26,13 @@ extern "C" {
 
 void delay(uint32_t ms)
 {
-  vTaskDelay(ms / portTICK_PERIOD_MS);
+  //hsj
+  uint32_t i;
+  for(i = 0; i < ms*4000; i++)
+  {
+      asm("nop");
+  }
+
 }
 
 #ifdef __cplusplus
