@@ -1,6 +1,5 @@
 /*
   Copyright (c) 2011 Arduino.  All right reserved.
-  Copyright (c) 2013 by Paul Stoffregen <paul@pjrc.com> (delayMicroseconds)
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -17,18 +16,38 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef _WIRING_H_
-#define _WIRING_H_
+#include "Arduino.h"
+//hsj #include "PinConfigured.h"
 
-#include <stdint.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <string.h>
-#include <math.h>
 
-#include "wiring_constants.h"
-#include "wiring_digital.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "gpio.h" //hsj
 
-#endif /* _WIRING_H_ */
+//hsj extern uint32_t g_anOutputPinConfigured[MAX_NB_PORT];
+
+void pinMode(uint32_t ulPin, uint32_t ulMode)
+{
+   GPIO_Config(GPIO_GPK(ulPin), (GPIO_FUNC(0UL) | ulMode));
+}
+
+void digitalWrite(uint32_t ulPin, uint32_t ulVal)
+{
+  //digitalWriteFast(digitalPinToPinName(ulPin), ulVal);
+  GPIO_Set(GPIO_GPK(ulPin), ulVal);
+}
+
+int digitalRead(uint32_t ulPin)
+{
+  return digitalReadFast(digitalPinToPinName(ulPin));
+}
+
+void digitalToggle(uint32_t ulPin)
+{
+  digitalToggleFast(digitalPinToPinName(ulPin));
+}
+
+#ifdef __cplusplus
+}
+#endif
