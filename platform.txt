@@ -139,9 +139,6 @@ tools.fwdn.program.pattern.linux="{path}/{cmd}" {program.pattern_args}
 tools.fwdn.upload.protocol=serial
 tools.fwdn.upload.params.verbose=
 tools.fwdn.upload.params.quiet=
-# tools.fwdn.upload.pattern_args=-w "{build.path}/{build.project_name}.rom" --fwdn "{path}/vcp_fwdn.rom" --port "{serial.port}"
-# [TODO] fix this temporary HARD CODED COM port argument
-tools.fwdn.upload.pattern_args=-w "{build.path}/{build.project_name}.rom" --fwdn "{path}/vcp_fwdn.rom" --port 5
-# --port "{serial.port}"
+tools.fwdn.upload.pattern_args=-w "{build.path}/{build.project_name}.rom" --fwdn "{path}/vcp_fwdn.rom" --port "{serial.port}"
 tools.fwdn.upload.pattern.windows="{path}/{cmd}" {upload.pattern_args}
 tools.fwdn.upload.pattern.linux="{path}/{cmd}" {upload.pattern_args}
