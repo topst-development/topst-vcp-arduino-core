@@ -1,6 +1,8 @@
 #ifndef LiquidCrystal_I2C_h
 #define LiquidCrystal_I2C_h
 
+#include <inttypes.h>
+#include "Print.h"
 #include <SWire.h>
 
 // commands
@@ -92,6 +94,9 @@ void cursor_off();      					// alias for noCursor()
 void setBacklight(uint8_t new_val);				// alias for backlight() and nobacklight()
 void load_custom_character(uint8_t char_num, uint8_t *rows);	// alias for createChar()
 void printstr(const char[]);
+//hsj
+size_t lcdwrite(const char *str);
+size_t print(const char str[]);
 
 ////Unsupported API functions (not implemented in this library)
 uint8_t status();

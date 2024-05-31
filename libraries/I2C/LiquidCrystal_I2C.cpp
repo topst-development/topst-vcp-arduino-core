@@ -1,12 +1,14 @@
 // Based on the work by DFRobot
 
 #include "LiquidCrystal_I2C.h"
+#include <inttypes.h>
 #include "SWire.h"
 
 #define printIIC(args)	SWire.write(args)
 inline void LiquidCrystal_I2C::write(uint8_t value) {
 	send(value, Rs);
 }
+
 
 
 // When the display powers up, it is configured as follows:
@@ -282,6 +284,23 @@ void LiquidCrystal_I2C::printstr(const char c[]){
 	//This function is not identical to the function used for "real" I2C displays
 	//it's here so the user sketch doesn't have to be changed 
 	//hsj print(c);
+}
+
+size_t LiquidCrystal_I2C::lcdwrite(const char *str) 
+{
+	if (str == NULL) return 0;
+    size_t size = strlen(str);
+	size_t n = 0;
+	while (size--) 
+	{
+		write(*str++); n++;
+	}
+    return n;
+}
+
+size_t LiquidCrystal_I2C::print(const char str[])
+{ 
+  return lcdwrite(str);
 }
 
 
