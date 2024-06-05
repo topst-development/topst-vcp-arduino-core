@@ -17,30 +17,25 @@
 */
 
 #include "Arduino.h"
-//hsj #include "PinConfigured.h"
-
+#include "pins_vcp.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-
-//hsj extern uint32_t g_anOutputPinConfigured[MAX_NB_PORT];
-
 void pinMode(uint32_t ulPin, uint32_t ulMode)
 {
-   GPIO_Config(GPIO_GPK(ulPin), (GPIO_FUNC(0UL) | ulMode));
+   pinCFG(ulPin, ulMode);
 }
 
 void digitalWrite(uint32_t ulPin, uint32_t ulVal)
 {
-  //digitalWriteFast(digitalPinToPinName(ulPin), ulVal);
-  GPIO_Set(GPIO_GPK(ulPin), ulVal);
+  pinSET(ulPin, ulVal);
 }
 
 int digitalRead(uint32_t ulPin)
 {
-  return digitalReadFast(digitalPinToPinName(ulPin));
+  return pinREAD(ulPin); 
 }
 
 void digitalToggle(uint32_t ulPin)
