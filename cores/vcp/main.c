@@ -70,7 +70,7 @@ static void ArduinoAppTask(void *pArg)
 {
     (void)pArg;
     #if defined(ARDUINO)
-    setup(); //hsj
+    setup(); 
     #endif
     uint8_t ucAccSwitchStatus;
     uint8_t ucILLISwitchStatus;
@@ -120,7 +120,7 @@ static void ArduinoAppTask(void *pArg)
     while(1)
     {
         #if defined(ARDUINO)
-        loop(); //hsj
+        loop(); 
         #endif
         SAL_TaskSleep(0);
     }
