@@ -1,6 +1,5 @@
 /*
   Copyright (c) 2011 Arduino.  All right reserved.
-  Copyright (c) 2013 by Paul Stoffregen <paul@pjrc.com> (delayMicroseconds)
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -17,19 +16,32 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef _WIRING_H_
-#define _WIRING_H_
+#ifndef _WIRING_ANALOG_
+#define _WIRING_ANALOG_
 
-#include <stdint.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <string.h>
-#include <math.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "wiring_constants.h"
-#include "wiring_digital.h"
-#include "wiring_analog.h"
+/*
+ * \brief Reads the value from the specified analog pin.
+ *
+ * \param ulPin
+ *
+ * \return Read value from selected pin, if no error.
+ */
+extern uint32_t analogRead(uint32_t ulPin) ;
 
-#include "gpio.h"
+/*
+ * \brief Writes an analog value (PWM wave) to a pin.
+ *
+ * \param ulPin
+ * \param ulValue
+ */
+extern void analogWrite(uint32_t ulPin, uint32_t ulValue) ;
 
-#endif /* _WIRING_H_ */
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* _WIRING_ANALOG_ */
