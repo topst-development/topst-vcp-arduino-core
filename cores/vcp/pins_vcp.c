@@ -80,7 +80,7 @@ uint8_t pinCFG(uint32_t vcpPin, uint32_t vcpPinM)
                          break;
                 /* LED_BUILTIN : GPIO_K16 */
                 case 316: GPIO_Config(GPIO_GPK(16UL), (GPIO_FUNC(0UL)|vcpPinMode)); 
-                         break;        
+                         break;  
                 default:
                          break;
         }

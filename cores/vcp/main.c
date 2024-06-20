@@ -20,6 +20,7 @@
 #include "uart.h"
 #include "pmu_reg.h"
 #include "Arduino.h"
+
 // #include "conditional_includes.h" // This will include conditionally required headers like power_app.h, key.h etc.
 
 /* Global Variables */
@@ -72,53 +73,53 @@ static void ArduinoAppTask(void *pArg)
     #if defined(ARDUINO)
     setup(); 
     #endif
-    uint8_t ucAccSwitchStatus;
-    uint8_t ucILLISwitchStatus;
-    uint8_t ucStrSwitchStatus;
-    uint8_t ucKey0Status;
+    // uint8_t ucAccSwitchStatus;
+    // uint8_t ucILLISwitchStatus;
+    // uint8_t ucStrSwitchStatus;
+    // uint8_t ucKey0Status;
 
-    GPIO_WriteReg(0xA0F28808, 0xFFFFFFFFUL);
-    // set GPIOK_16 as output for LED
-    GPIO_Config(GPIO_GPK(16UL), (GPIO_FUNC(0UL) | GPIO_OUTPUT));
-    // LED Off
-    GPIO_Set(GPIO_GPK(16UL), 1UL);
+    // GPIO_WriteReg(0xA0F28808, 0xFFFFFFFFUL);
+    // // set GPIOK_16 as output for LED
+    // GPIO_Config(GPIO_GPK(16UL), (GPIO_FUNC(0UL) | GPIO_OUTPUT));
+    // // LED Off
+    // GPIO_Set(GPIO_GPK(16UL), 1UL);
 
-    // set GPIOK_7 as input for KEY0 button
-    GPIO_Config(GPIO_GPK(7UL), (GPIO_FUNC(0UL) | GPIO_INPUTBUF_EN | GPIO_PULLUP));
+    // // set GPIOK_7 as input for KEY0 button
+    // GPIO_Config(GPIO_GPK(7UL), (GPIO_FUNC(0UL) | GPIO_INPUTBUF_EN | GPIO_PULLUP));
 
-    // set GPIOK_5 as input for ACC Switch
-    GPIO_Config(GPIO_GPK(5UL), (GPIO_FUNC(0UL) | GPIO_INPUTBUF_EN | GPIO_PULLUP));
-    // set GPIOC_3 as input for ILLI Switch
-    GPIO_Config(GPIO_GPC(3UL), (GPIO_FUNC(0UL) | GPIO_INPUTBUF_EN));
-    // set GPIOK_2 as input for STR Switch
-    GPIO_Config(GPIO_GPK(2UL), (GPIO_FUNC(0UL) | GPIO_INPUTBUF_EN | GPIO_PULLUP));
+    // // set GPIOK_5 as input for ACC Switch
+    // GPIO_Config(GPIO_GPK(5UL), (GPIO_FUNC(0UL) | GPIO_INPUTBUF_EN | GPIO_PULLUP));
+    // // set GPIOC_3 as input for ILLI Switch
+    // GPIO_Config(GPIO_GPC(3UL), (GPIO_FUNC(0UL) | GPIO_INPUTBUF_EN));
+    // // set GPIOK_2 as input for STR Switch
+    // GPIO_Config(GPIO_GPK(2UL), (GPIO_FUNC(0UL) | GPIO_INPUTBUF_EN | GPIO_PULLUP));
 
-    ucAccSwitchStatus = GPIO_Get(GPIO_GPK(5UL));
-    ucILLISwitchStatus = GPIO_Get(GPIO_GPC(3UL));
-    ucStrSwitchStatus = GPIO_Get(GPIO_GPK(2UL));
-    ucKey0Status = GPIO_Get(GPIO_GPK(7UL));
+    // ucAccSwitchStatus = GPIO_Get(GPIO_GPK(5UL));
+    // ucILLISwitchStatus = GPIO_Get(GPIO_GPC(3UL));
+    // ucStrSwitchStatus = GPIO_Get(GPIO_GPK(2UL));
+    // ucKey0Status = GPIO_Get(GPIO_GPK(7UL));
 
-    mcu_printf("%s, ACC Switch Status : %d\n", __func__, ucAccSwitchStatus);
-    mcu_printf("%s, ILLI Switch Status : %d\n", __func__, ucILLISwitchStatus);
-    mcu_printf("%s, STR Switch Status : %d\n", __func__, ucStrSwitchStatus);
-    mcu_printf("%s, KEY0 Button Status : %d\n", __func__, ucKey0Status);
+    // mcu_printf("%s, ACC Switch Status : %d\n", __func__, ucAccSwitchStatus);
+    // mcu_printf("%s, ILLI Switch Status : %d\n", __func__, ucILLISwitchStatus);
+    // mcu_printf("%s, STR Switch Status : %d\n", __func__, ucStrSwitchStatus);
+    // mcu_printf("%s, KEY0 Button Status : %d\n", __func__, ucKey0Status);
 
-    sTimerCfg.ctChannel = TIMER_CH_1;
-    sTimerCfg.ctStartMode = TIMER_START_ZERO;
-    sTimerCfg.ctOpMode = TIMER_OP_FREERUN;
-    sTimerCfg.ctCounterMode = TIMER_COUNTER_MAIN;
-    sTimerCfg.ctMainValueUsec = 1 * 1000 * 1000; // 1 sec
-    sTimerCfg.ctCmp0ValueUsec = 0;
-    sTimerCfg.ctCmp1ValueUsec = 0;
-    sTimerCfg.fnHandler = Timer_MainHandler;
-    sTimerCfg.pArgs = NULL;
+    // sTimerCfg.ctChannel = TIMER_CH_1;
+    // sTimerCfg.ctStartMode = TIMER_START_ZERO;
+    // sTimerCfg.ctOpMode = TIMER_OP_FREERUN;
+    // sTimerCfg.ctCounterMode = TIMER_COUNTER_MAIN;
+    // sTimerCfg.ctMainValueUsec = 1 * 1000 * 1000; // 1 sec
+    // sTimerCfg.ctCmp0ValueUsec = 0;
+    // sTimerCfg.ctCmp1ValueUsec = 0;
+    // sTimerCfg.fnHandler = Timer_MainHandler;
+    // sTimerCfg.pArgs = NULL;
 
-    (void)TIMER_Init();
-    (void)TIMER_EnableWithCfg(&sTimerCfg);
-    GIC_IntSrcEn((uint32_t)GIC_TIMER_0 + sTimerCfg.ctChannel);
+    // (void)TIMER_Init();
+    // (void)TIMER_EnableWithCfg(&sTimerCfg);
+    // GIC_IntSrcEn((uint32_t)GIC_TIMER_0 + sTimerCfg.ctChannel);
 
     while(1)
-    {
+    {   
         #if defined(ARDUINO)
         loop(); 
         #endif
@@ -142,13 +143,13 @@ void cmain(void) {
     BSP_PreInit(); // Initialize basic BSP functions
     
     BSP_Init(); // Initialize advanced BSP functions
-    SAL_GetVersion(&versionInfo);
+    // SAL_GetVersion(&versionInfo);
 
-    mcu_printf("\n===============================\n");
-    mcu_printf("    MCU BSP Version: V%d.%d.%d\n", versionInfo.viMajorVersion, versionInfo.viMinorVersion, versionInfo.viPatchVersion);
-    mcu_printf("-------------------------------\n");
-    DisplayOTPInfo();
-    mcu_printf("===============================\n\n");
+    // mcu_printf("\n===============================\n");
+    // mcu_printf("    MCU BSP Version: V%d.%d.%d\n", versionInfo.viMajorVersion, versionInfo.viMinorVersion, versionInfo.viPatchVersion);
+    // mcu_printf("-------------------------------\n");
+    // DisplayOTPInfo();
+    // mcu_printf("===============================\n\n");
 
     err = SAL_TaskCreate(&AppTaskStartID, "App Task Start", Main_StartTask, AppTaskStartStk, ACFG_TASK_MEDIUM_STK_SIZE, SAL_PRIO_APP_CFG, NULL);
     err |= SAL_TaskCreate(&ArduinoAppTaskID,"Arduino App Task", ArduinoAppTask, &ArduinoAppTaskStk[0], ARDUINO_APP_TASK_STK_SIZE, SAL_PRIO_ARDUINO_APP, NULL);

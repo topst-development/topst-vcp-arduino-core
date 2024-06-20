@@ -39,13 +39,20 @@ typedef bool boolean;
 #define DEFAULT 1
 #define EXTERNAL 0
 
+#include "WMath.h"
+
+//#include "HardwareSerial.h"
+
 #include "pins_arduino.h"
 #include "wiring.h"
+
+
 
 void yield( void ) ;
 
 /* system functions */
-int main( void );
+//int main( void );
+void cmain(void); 
 
 /* sketch */
 void setup( void ) ;
