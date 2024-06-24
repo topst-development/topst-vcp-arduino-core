@@ -44,6 +44,11 @@
 #ifndef UART_HEADER
 #define UART_HEADER
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 #include <sal_internal.h>
 #include <gic.h>
 
@@ -155,87 +160,87 @@ enum
 ***************************************************************************************************
 */
 
-int32_t UART_Open
+sint32 UART_Open
 (
-    uint8_t                               ucCh,
-    uint32_t                              uiPriority,     // Interrupt priority
-    uint32_t                              uiBaudrate,     // Baudrate
-    uint8_t                               ucMode,         // polling or interrupt or udma
-    uint8_t                               ucCtsRts,       // on/off
-    uint8_t                               ucPortCfg,      // port selection
-    uint8_t                               ucWordLength,   // 5~6 bits
-    uint8_t                               ucFIFO,         // on/off
-    uint8_t                               uc2StopBit,     // on/off
-    uint8_t                               ucParity,       // space, even, odd, mark
+    uint8                               ucCh,
+    uint32                              uiPriority,     // Interrupt priority
+    uint32                              uiBaudrate,     // Baudrate
+    uint8                               ucMode,         // polling or interrupt or udma
+    uint8                               ucCtsRts,       // on/off
+    uint8                               ucPortCfg,      // port selection
+    uint8                               ucWordLength,   // 5~6 bits
+    uint8                               ucFIFO,         // on/off
+    uint8                               uc2StopBit,     // on/off
+    uint8                               ucParity,       // space, even, odd, mark
     GICIsrFunc                          fnCallback      // callback function
 );
 
 void UART_Close
 (
-    uint8_t                               ucCh
+    uint8                               ucCh
 );
 
-int32_t UART_Read
+sint32 UART_Read
 (
-    uint8_t                               ucCh,
-    uint8_t                               *pucBuf,
-    uint32_t                              uiSize
+    uint8                               ucCh,
+    uint8                               *pucBuf,
+    uint32                              uiSize
 );
 
-int32_t UART_Write
+sint32 UART_Write
 (
-    uint8_t                               ucCh,
-    const uint8_t                         *pucBuf,
-    uint32_t                              uiSize
+    uint8                               ucCh,
+    const uint8                         *pucBuf,
+    uint32                              uiSize
 );
 
-uint32_t UART_GetData
+uint32 UART_GetData
 (
-    uint8_t                               ucCh,
-    int32_t                              iWait,
-    int8_t                               *pcErr
+    uint8                               ucCh,
+    sint32                              iWait,
+    sint8                               *pcErr
 );
 
-int32_t UART_GetChar
+sint32 UART_GetChar
 (
-    uint8_t                               ucCh,
-    int32_t                              iWait,
-    int8_t                               *pcErr
+    uint8                               ucCh,
+    sint32                              iWait,
+    sint8                               *pcErr
 );
 
-int32_t UART_PutChar
+sint32 UART_PutChar
 (
-    uint8_t                               ucCh,
-    uint8_t                               ucChar
+    uint8                               ucCh,
+    uint8                               ucChar
 );
 
 void UART_SetLineControlReg
 (
-    uint8_t                               ucCh,
-    uint32_t                              uiBits,
-    uint8_t                               uiEnabled
+    uint8                               ucCh,
+    uint32                              uiBits,
+    uint8                               uiEnabled
 );
 
 void UART_SetInterruptClearReg
 (
-    uint8_t                               ucCh,
-    uint32_t                              uiSetValue
+    uint8                               ucCh,
+    uint32                              uiSetValue
 );
 
 void UART_SetErrorClearReg
 (
-    uint8_t                               ucCh,
-    uint32_t                              uiSetValue
+    uint8                               ucCh,
+    uint32                              uiSetValue
 );
 
-uint32_t UART_GetReceiveStatusReg
+uint32 UART_GetReceiveStatusReg
 (
-    uint8_t                               ucCh
+    uint8                               ucCh
 );
 
-uint32_t UART_GetRawInterruptStatusReg
+uint32 UART_GetRawInterruptStatusReg
 (
-    uint8_t                               ucCh
+    uint8                               ucCh
 );
 
 void UART_Init
@@ -247,6 +252,10 @@ void UART_ISR
 (
     void *                              pArg
 );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _PLATFORM_TCC_UART_H_ */
 

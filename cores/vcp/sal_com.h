@@ -60,6 +60,31 @@
 /*
  * Primitive Type, AUTOSAR type, MISRA C:2012 - 4.6
  */
+typedef char                            int8;       /*        -128 .. +127            */
+typedef signed char                     sint8;      /*        -128 .. +127            */
+typedef unsigned char                   uint8;      /*           0 .. 255             */
+typedef short                           int16;      /*      -32768 .. +32767          */
+typedef signed short                    sint16;     /*      -32768 .. +32767          */
+typedef unsigned short                  uint16;     /*           0 .. 65535           */
+typedef long                            int32;      /* -2147483648 .. +2147483647     */
+typedef signed long                     sint32;     /* -2147483648 .. +2147483647     */
+typedef unsigned long                   uint32;     /*           0 .. 4294967295      */
+typedef long long                       int64;
+typedef signed long long                sint64;
+typedef unsigned long long              uint64;     /*       0..18446744073709551615  */
+
+typedef int                             int32a;     /* -2147483648 .. +2147483647     */
+typedef signed int                      sint32a;    /* -2147483648 .. +2147483647     */
+typedef unsigned int                    uint32a;    /*           0 .. 4294967295      */
+
+typedef uint32                          uintptr;
+typedef sint32                          sintptr;
+
+typedef uint32                          SALSize;
+
+/*
+ * Primitive Type, AUTOSAR type, MISRA C:2012 - 4.6
+ */
 #include <stdint.h>
 
 typedef uint32_t                          SALSize;
@@ -70,7 +95,7 @@ typedef uint32_t                          SALSize;
 #endif
 
 #ifndef NULL_PTR
-#define NULL_PTR                        ((void *)0)
+#define NULL_PTR                        NULL //hsj((void *)0)
 #endif
 
 #ifndef FALSE
