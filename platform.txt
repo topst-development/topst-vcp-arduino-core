@@ -17,7 +17,7 @@ compiler.warning_flags.all=-Wall -Wextra
 
 compiler.path={runtime.tools.xpack-arm-none-eabi-gcc-10.2.1-1.1.path}/bin/
 #compiler.path=C:\Users\dkkang\AppData\Local\Arduino15\packages\STMicroelectronics\tools\xpack-arm-none-eabi-gcc\12.2.1-1.2\bin\
-compiler.path=
+#compiler.path=
 
 compiler.S.cmd=arm-none-eabi-gcc
 compiler.c.cmd=arm-none-eabi-gcc
