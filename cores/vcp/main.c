@@ -78,11 +78,11 @@ static void ArduinoAppTask(void *pArg)
     // uint8_t ucStrSwitchStatus;
     // uint8_t ucKey0Status;
 
-    // GPIO_WriteReg(0xA0F28808, 0xFFFFFFFFUL);
-    // // set GPIOK_16 as output for LED
-    // GPIO_Config(GPIO_GPK(16UL), (GPIO_FUNC(0UL) | GPIO_OUTPUT));
-    // // LED Off
-    // GPIO_Set(GPIO_GPK(16UL), 1UL);
+    GPIO_WriteReg(0xA0F28808, 0xFFFFFFFFUL);
+    // set GPIOK_16 as output for LED
+    GPIO_Config(GPIO_GPK(16UL), (GPIO_FUNC(0UL) | GPIO_OUTPUT));
+    // LED Off
+    GPIO_Set(GPIO_GPK(16UL), 1UL);
 
     // // set GPIOK_7 as input for KEY0 button
     // GPIO_Config(GPIO_GPK(7UL), (GPIO_FUNC(0UL) | GPIO_INPUTBUF_EN | GPIO_PULLUP));
