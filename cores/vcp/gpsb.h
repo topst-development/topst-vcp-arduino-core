@@ -62,7 +62,7 @@ extern "C" {
 #include <gpio.h>
 #include <gic.h>
 #include <sal_internal.h>
-#include "arduino.h" //hsj
+#include "Arduino.h"
 
 /* GPSB Debug message control */
 #ifdef DEBUG_ENABLE

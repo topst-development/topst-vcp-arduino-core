@@ -7,7 +7,7 @@
 
 #include <inttypes.h>
 
-#include "stream.h"
+#include "Stream.h"
 #include "uart.h"
 
 #define DEC 10
