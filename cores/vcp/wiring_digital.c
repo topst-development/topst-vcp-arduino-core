@@ -23,24 +23,24 @@
 extern "C" {
 #endif
 
-void pinMode(uint32_t ulPin, uint32_t ulMode)
+void pinMode(uint32_t Pin, uint32_t PinMode)
 {
-   pinCFG(ulPin, ulMode);
+   pinCFG(Pin, PinMode);
 }
 
-void digitalWrite(uint32_t ulPin, uint32_t ulVal)
+void digitalWrite(uint32_t Pin, uint32_t PinValue)
 {
-  pinSET(ulPin, ulVal);
+  pinSET(Pin, PinValue);
 }
 
-int digitalRead(uint32_t ulPin)
+int digitalRead(uint32_t Pin)
 {
-  return pinREAD(ulPin); 
+  return pinREAD(Pin); 
 }
 
-void digitalToggle(uint32_t ulPin)
+void digitalToggle(uint32_t Pin)
 {
-  digitalToggleFast(digitalPinToPinName(ulPin));
+  digitalToggleFast(digitalPinToPinName(Pin));
 }
 
 #ifdef __cplusplus
