@@ -7,14 +7,27 @@ menu.rtlib=C Runtime Library
 menu.upload_method=Upload method
 
 ################################################################################
-# TOPST VCP TCC7045
-vcp.name=TOPST VCP
-vcp.build.core=vcp
-vcp.build.mcu=cortex-r5
-# vcp is variant directory name
-vcp.build.variant=vcp
-# build.board is passed to the build system as -DBOARD_NAME=\"vcp\"
-vcp.build.board=vcp
-vcp.build.ldscript=linker_scripts/linker_512.ld
-vcp.upload.tool.default=fwdn
-vcp.upload.tool=fwdn
+# TOPST VCP TCC7045 rev b (pre-mass production)
+vcp_b.name=TOPST VCP rev B
+vcp_b.build.core=vcp
+vcp_b.build.mcu=cortex-r5
+# vcp_b is variant directory name
+vcp_b.build.variant=vcp_b
+# build.board is passed to the build system as -DBOARD_NAME="VCP_B"
+vcp_b.build.board=VCP_B
+vcp_b.build.ldscript=linker_scripts/linker_512.ld
+vcp_b.upload.tool.default=fwdn
+vcp_b.upload.tool=fwdn
+
+################################################################################
+# TOPST VCP rev G
+vcp_g.name=TOPST VCP rev G
+vcp_g.build.core=vcp
+vcp_g.build.mcu=cortex-r5
+# vcp_g is variant directory name
+vcp_g.build.variant=vcp_g
+# build.board is passed to the build system as -DBOARD_NAME="VCP_G"
+vcp_g.build.board=VCP_G
+vcp_g.build.ldscript=linker_scripts/linker_512.ld
+vcp_g.upload.tool.default=fwdn
+vcp_g.upload.tool=fwdn
