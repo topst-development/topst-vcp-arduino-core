@@ -22,7 +22,7 @@ uint8_t pinCFG(uint32_t Pin, uint32_t PinMode)
         GPIO_PinMode = GPIO_OUTPUT;
     }
 
-    ret = (uint8_t)GPIO_Config(Pin, GPIO_PinMode);
+    ret = (uint8_t)GPIO_Config(PIN_MAP[Pin], GPIO_PinMode);
     if (ret != 0) // 0 means success, so return 0 if failed
     {
         return 0;
@@ -35,7 +35,7 @@ uint8_t pinSET(uint32_t Pin, uint32_t Value)
 {
     uint8_t ret;
 
-    ret = (uint8_t)GPIO_Set(Pin, Value);
+    ret = (uint8_t)GPIO_Set(PIN_MAP[Pin], Value);
     if (ret != 0) // not 0 means failed, so return FALSE
     {
         return FALSE;
@@ -48,9 +48,9 @@ int pinREAD(uint32_t Pin)
 {
     uint8_t level = 0;
 
-    level = GPIO_Get(Pin);
+    level = GPIO_Get(PIN_MAP[Pin]);
 
     return (level) ? HIGH : LOW;
 }
 
-#endif /* ARDUINO_GENERIC_* */
+#endif /* ARDUINO_GENERIC_VARIANT_H */
