@@ -1,14 +1,14 @@
 /**
- * @file pin_def.h
- * @brief Pin definitions for VCP-G variant
+ * @file variant_pin.h
+ * @brief Pin definitions for VCP-B variant
  * 
  * This header file contains the pin mapping and configuration definitions
- * specific to the VCP-G variant board. It defines constants and macros
+ * specific to the VCP-B variant board. It defines constants and macros
  * for GPIO pins, peripheral connections, and other hardware-specific settings.
  */
 
-#ifndef PIN_DEF_H
-#define PIN_DEF_H
+#ifndef VARIANT_PIN_H
+#define VARIANT_PIN_H
 
 /* Arduino pin name and GPIO pin name mapping */
 #define D3  GPIO_GPB(1UL)
@@ -41,4 +41,4 @@
 #define D40 GPIO_GPC(12UL)
 #define LED_BUILTIN GPIO_GPK(16UL)
 
-#endif /* PIN_DEF_H */
+#endif /* VARIANT_PIN_H */
