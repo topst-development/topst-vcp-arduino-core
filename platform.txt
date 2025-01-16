@@ -68,7 +68,7 @@ compiler.elf2hex.extra_flags=
 
 
 # Build information's
-build.info.flags=-DARDUINO={runtime.ide.version} -DARDUINO_{build.board} -DARDUINO_ARCH_{build.arch} -DBOARD_NAME="{build.board}"
+build.info.flags=-DARDUINO={runtime.ide.version} -DARDUINO_{build.board} -DARDUINO_ARCH_{build.arch} -DBOARD_{build.board}
 
 # Defaults config
 build.xSerial=-DHAL_UART_MODULE_ENABLED
