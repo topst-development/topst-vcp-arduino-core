@@ -12,21 +12,51 @@ void SoftWire::i2cDelay() {
 }
 
 void SoftWire::sclHi() {
+  #if defined(BOARD_VCP_B)
   GPIO_Config(GPIO_GPB(2UL), (GPIO_FUNC(0UL) | GPIO_INPUTBUF_EN | GPIO_PULLUP));
+  #elif defined(BOARD_VCP_G)
+  /* VCP_G use GPIO_GPA(4UL) as SCL and GPIO_GPA(5UL) as SDA */
+  GPIO_Config(GPIO_GPA(4UL), (GPIO_FUNC(0UL) | GPIO_INPUTBUF_EN | GPIO_PULLUP));
+  #else
+  #error BOARD_VCP_B or BOARD_VCP_G is not defined
+  #endif
 }
 
 void SoftWire::sdaHi() {
+  #if defined(BOARD_VCP_B)
   GPIO_Config(GPIO_GPB(3UL), (GPIO_FUNC(0UL) | GPIO_INPUTBUF_EN | GPIO_PULLUP));
+  #elif defined(BOARD_VCP_G)
+  /* VCP_G use GPIO_GPA(5UL) as SDA */
+  GPIO_Config(GPIO_GPA(5UL), (GPIO_FUNC(0UL) | GPIO_INPUTBUF_EN | GPIO_PULLUP));
+  #else
+  #error BOARD_VCP_B or BOARD_VCP_G is not defined
+  #endif
 }
 
 void SoftWire::sclLo() {
+  #if defined(BOARD_VCP_B)
   GPIO_Set(GPIO_GPB(2UL), 0UL);
   GPIO_Config(GPIO_GPB(2UL), (GPIO_FUNC(0UL) | GPIO_OUTPUT));
+  #elif defined(BOARD_VCP_G)
+  /* VCP_G use GPIO_GPA(4UL) as SCL */
+  GPIO_Set(GPIO_GPA(4UL), 0UL);
+  GPIO_Config(GPIO_GPA(4UL), (GPIO_FUNC(0UL) | GPIO_OUTPUT));
+  #else
+  #error BOARD_VCP_B or BOARD_VCP_G is not defined
+  #endif
 }
 
 void SoftWire::sdaLo() {
+  #if defined(BOARD_VCP_B)
   GPIO_Set(GPIO_GPB(3UL), 0UL);
   GPIO_Config(GPIO_GPB(3UL), (GPIO_FUNC(0UL) | GPIO_OUTPUT));
+  #elif defined(BOARD_VCP_G)
+  /* VCP_G use GPIO_GPA(5UL) as SDA */
+  GPIO_Set(GPIO_GPA(5UL), 0UL);
+  GPIO_Config(GPIO_GPA(5UL), (GPIO_FUNC(0UL) | GPIO_OUTPUT));
+  #else
+  #error BOARD_VCP_B or BOARD_VCP_G is not defined
+  #endif
 }
 
 void SoftWire::start() {
@@ -86,7 +116,14 @@ uint8_t SoftWire::readBit() {
 
   sclHi();
   i2cDelay();
+  #if defined(BOARD_VCP_B)
   out_bit = GPIO_Get(GPIO_GPB(3UL)); 
+  #elif defined(BOARD_VCP_G)
+  /* VCP_G use GPIO_GPA(5UL) as SDA */
+  out_bit = GPIO_Get(GPIO_GPA(5UL)); 
+  #else
+  #error BOARD_VCP_B or BOARD_VCP_G is not defined
+  #endif
   sclLo();
   i2cDelay();
   return out_bit;
@@ -111,7 +148,14 @@ uint8_t SoftWire::readAck() {
   sdaHi();
   sclHi();
   i2cDelay();
+  #if defined(BOARD_VCP_B)
   uint8_t result =GPIO_Get(GPIO_GPB(3UL)); 
+  #elif defined(BOARD_VCP_G)
+  /* VCP_G use GPIO_GPA(5UL) as SDA */
+  uint8_t result =GPIO_Get(GPIO_GPA(5UL)); 
+  #else
+  #error BOARD_VCP_B or BOARD_VCP_G is not defined
+  #endif
   sclLo();
   sdaLo();
   i2cDelay();
