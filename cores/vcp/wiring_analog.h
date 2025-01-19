@@ -38,6 +38,17 @@ extern "C" {
 #define A10 (ANALOG_PIN_BASE + 10)
 #define A11 (ANALOG_PIN_BASE + 11)
 #define AREF (ANALOG_PIN_BASE + 12)
+
+#define A0  A00
+#define A1  A01
+#define A2  A02
+#define A3  A03
+#define A4  A04
+#define A5  A05
+#define A6  A06
+#define A7  A07
+#define A8  A08
+#define A9  A09
 #endif
 /*
  * \brief Reads the value from the specified analog pin.
