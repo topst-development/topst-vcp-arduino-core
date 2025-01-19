@@ -23,6 +23,22 @@
 extern "C" {
 #endif
 
+#if defined(BOARD_VCP_G)
+#define ANALOG_PIN_BASE 1000
+#define A00 (ANALOG_PIN_BASE + 0)
+#define A01 (ANALOG_PIN_BASE + 1)
+#define A02 (ANALOG_PIN_BASE + 2)
+#define A03 (ANALOG_PIN_BASE + 3)
+#define A04 (ANALOG_PIN_BASE + 4)
+#define A05 (ANALOG_PIN_BASE + 5)
+#define A06 (ANALOG_PIN_BASE + 6)
+#define A07 (ANALOG_PIN_BASE + 7)
+#define A08 (ANALOG_PIN_BASE + 8)
+#define A09 (ANALOG_PIN_BASE + 9)
+#define A10 (ANALOG_PIN_BASE + 10)
+#define A11 (ANALOG_PIN_BASE + 11)
+#define AREF (ANALOG_PIN_BASE + 12)
+#endif
 /*
  * \brief Reads the value from the specified analog pin.
  *
