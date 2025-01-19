@@ -43,99 +43,91 @@
 
 #define MCU_BSP_SUPPORT_DRIVER_PDM 1
 
-#if ( MCU_BSP_SUPPORT_DRIVER_PDM == 1 )
+#if (MCU_BSP_SUPPORT_DRIVER_PDM == 1)
 
 #include "bsp.h"
 
-#if ( MCU_BSP_SUPPORT_DRIVER_FMU == 1 )
-    #include "fmu.h"
-#endif  // ( MCU_BSP_SUPPORT_DRIVER_FMU == 1 )
+#if (MCU_BSP_SUPPORT_DRIVER_FMU == 1)
+#include "fmu.h"
+#endif // ( MCU_BSP_SUPPORT_DRIVER_FMU == 1 )
 
 #include "gpio.h"
 #include "pdm.h"
 #include "pmio.h"
 
 /**************************************************************************************************
-*                                             LOCAL VARIABLES
-***************************************************************************************************/
+ *                                             LOCAL VARIABLES
+ ***************************************************************************************************/
 
-
-static PDMChannelHandler_t              PDMHandler[PDM_TOTAL_CHANNELS];
+static PDMChannelHandler_t PDMHandler[PDM_TOTAL_CHANNELS];
 
 #ifdef PDM_SAFETY_FEATURE_ENABLED
-static PMMISRData_t                     PDMIsrData[PDM_TOTAL_CHANNELS];
-static boolean                          g_safety_enabled = FALSE;
+static PMMISRData_t PDMIsrData[PDM_TOTAL_CHANNELS];
+static boolean g_safety_enabled = FALSE;
 #endif
 
 /* On the TCC70xx, PDM port is configured at PERICHSEL register (0xA0F222B8) */
 static PDMPortConfig_t sPdmPort[PDM_OUT_PORT_MAX] =
-{
-    /* PDM select channel 0 : GPIO-A */
-    { GPIO_PERICH_SEL_PWMSEL_0,     GPIO_GPA(10UL),    GPIO_FUNC(2UL),    GPIO_PERICH_CH0 },
-    { GPIO_PERICH_SEL_PWMSEL_1,     GPIO_GPA(11UL),    GPIO_FUNC(2UL),    GPIO_PERICH_CH0 },
-    { GPIO_PERICH_SEL_PWMSEL_2,     GPIO_GPA(12UL),    GPIO_FUNC(2UL),    GPIO_PERICH_CH0 },
-    { GPIO_PERICH_SEL_PWMSEL_3,     GPIO_GPA(13UL),    GPIO_FUNC(2UL),    GPIO_PERICH_CH0 },
-    { GPIO_PERICH_SEL_PWMSEL_4,     GPIO_GPA(14UL),    GPIO_FUNC(2UL),    GPIO_PERICH_CH0 },
-    { GPIO_PERICH_SEL_PWMSEL_5,     GPIO_GPA(15UL),    GPIO_FUNC(2UL),    GPIO_PERICH_CH0 },
-    { GPIO_PERICH_SEL_PWMSEL_6,     GPIO_GPA(16UL),    GPIO_FUNC(2UL),    GPIO_PERICH_CH0 },
-    { GPIO_PERICH_SEL_PWMSEL_7,     GPIO_GPA(17UL),    GPIO_FUNC(2UL),    GPIO_PERICH_CH0 },
-    { GPIO_PERICH_SEL_PWMSEL_8,     GPIO_GPA(18UL),    GPIO_FUNC(2UL),    GPIO_PERICH_CH0 },
+    {
+        /* PDM select channel 0 : GPIO-A */
+        {GPIO_PERICH_SEL_PWMSEL_0, GPIO_GPA(10UL), GPIO_FUNC(2UL), GPIO_PERICH_CH0},
+        {GPIO_PERICH_SEL_PWMSEL_1, GPIO_GPA(11UL), GPIO_FUNC(2UL), GPIO_PERICH_CH0},
+        {GPIO_PERICH_SEL_PWMSEL_2, GPIO_GPA(12UL), GPIO_FUNC(2UL), GPIO_PERICH_CH0},
+        {GPIO_PERICH_SEL_PWMSEL_3, GPIO_GPA(13UL), GPIO_FUNC(2UL), GPIO_PERICH_CH0},
+        {GPIO_PERICH_SEL_PWMSEL_4, GPIO_GPA(14UL), GPIO_FUNC(2UL), GPIO_PERICH_CH0},
+        {GPIO_PERICH_SEL_PWMSEL_5, GPIO_GPA(15UL), GPIO_FUNC(2UL), GPIO_PERICH_CH0},
+        {GPIO_PERICH_SEL_PWMSEL_6, GPIO_GPA(16UL), GPIO_FUNC(2UL), GPIO_PERICH_CH0},
+        {GPIO_PERICH_SEL_PWMSEL_7, GPIO_GPA(17UL), GPIO_FUNC(2UL), GPIO_PERICH_CH0},
+        {GPIO_PERICH_SEL_PWMSEL_8, GPIO_GPA(18UL), GPIO_FUNC(2UL), GPIO_PERICH_CH0},
 
-    /* PDM select channel 1 : GPIO-B */
-    { GPIO_PERICH_SEL_PWMSEL_0,     GPIO_GPB(6UL),     GPIO_FUNC(2UL),    GPIO_PERICH_CH1 },
-    { GPIO_PERICH_SEL_PWMSEL_1,     GPIO_GPB(7UL),     GPIO_FUNC(2UL),    GPIO_PERICH_CH1 },
-    { GPIO_PERICH_SEL_PWMSEL_2,     GPIO_GPB(8UL),     GPIO_FUNC(2UL),    GPIO_PERICH_CH1 },
-    { GPIO_PERICH_SEL_PWMSEL_3,     GPIO_GPB(9UL),     GPIO_FUNC(2UL),    GPIO_PERICH_CH1 },
-    { GPIO_PERICH_SEL_PWMSEL_4,     GPIO_GPB(10UL),    GPIO_FUNC(2UL),    GPIO_PERICH_CH1 },
-    { GPIO_PERICH_SEL_PWMSEL_5,     GPIO_GPB(11UL),    GPIO_FUNC(2UL),    GPIO_PERICH_CH1 },
-    { GPIO_PERICH_SEL_PWMSEL_6,     GPIO_GPB(26UL),    GPIO_FUNC(2UL),    GPIO_PERICH_CH1 },
-    { GPIO_PERICH_SEL_PWMSEL_7,     GPIO_GPB(27UL),    GPIO_FUNC(2UL),    GPIO_PERICH_CH1 },
-    { GPIO_PERICH_SEL_PWMSEL_8,     GPIO_GPB(28UL),    GPIO_FUNC(2UL),    GPIO_PERICH_CH1 },
+        /* PDM select channel 1 : GPIO-B */
+        {GPIO_PERICH_SEL_PWMSEL_0, GPIO_GPB(6UL), GPIO_FUNC(2UL), GPIO_PERICH_CH1},
+        {GPIO_PERICH_SEL_PWMSEL_1, GPIO_GPB(7UL), GPIO_FUNC(2UL), GPIO_PERICH_CH1},
+        {GPIO_PERICH_SEL_PWMSEL_2, GPIO_GPB(8UL), GPIO_FUNC(2UL), GPIO_PERICH_CH1},
+        {GPIO_PERICH_SEL_PWMSEL_3, GPIO_GPB(9UL), GPIO_FUNC(2UL), GPIO_PERICH_CH1},
+        {GPIO_PERICH_SEL_PWMSEL_4, GPIO_GPB(10UL), GPIO_FUNC(2UL), GPIO_PERICH_CH1},
+        {GPIO_PERICH_SEL_PWMSEL_5, GPIO_GPB(11UL), GPIO_FUNC(2UL), GPIO_PERICH_CH1},
+        {GPIO_PERICH_SEL_PWMSEL_6, GPIO_GPB(26UL), GPIO_FUNC(2UL), GPIO_PERICH_CH1},
+        {GPIO_PERICH_SEL_PWMSEL_7, GPIO_GPB(27UL), GPIO_FUNC(2UL), GPIO_PERICH_CH1},
+        {GPIO_PERICH_SEL_PWMSEL_8, GPIO_GPB(28UL), GPIO_FUNC(2UL), GPIO_PERICH_CH1},
 
-    /* PDM select channel 2 : GPIO-C */
-    { GPIO_PERICH_SEL_PWMSEL_0,     GPIO_GPC(6UL),     GPIO_FUNC(2UL),    GPIO_PERICH_CH2 },
-    { GPIO_PERICH_SEL_PWMSEL_1,     GPIO_GPC(7UL),     GPIO_FUNC(2UL),    GPIO_PERICH_CH2 },
-    { GPIO_PERICH_SEL_PWMSEL_2,     GPIO_GPC(8UL),     GPIO_FUNC(2UL),    GPIO_PERICH_CH2 },
-    { GPIO_PERICH_SEL_PWMSEL_3,     GPIO_GPC(9UL),     GPIO_FUNC(2UL),    GPIO_PERICH_CH2 },
-    { GPIO_PERICH_SEL_PWMSEL_4,     GPIO_GPC(10UL),    GPIO_FUNC(2UL),    GPIO_PERICH_CH2 },
-    { GPIO_PERICH_SEL_PWMSEL_5,     GPIO_GPC(11UL),    GPIO_FUNC(2UL),    GPIO_PERICH_CH2 },
-    { GPIO_PERICH_SEL_PWMSEL_6,     GPIO_GPC(12UL),    GPIO_FUNC(2UL),    GPIO_PERICH_CH2 },
-    { GPIO_PERICH_SEL_PWMSEL_7,     GPIO_GPC(13UL),    GPIO_FUNC(2UL),    GPIO_PERICH_CH2 },
-    { GPIO_PERICH_SEL_PWMSEL_8,     GPIO_GPC(14UL),    GPIO_FUNC(2UL),    GPIO_PERICH_CH2 },
+        /* PDM select channel 2 : GPIO-C */
+        {GPIO_PERICH_SEL_PWMSEL_0, GPIO_GPC(6UL), GPIO_FUNC(2UL), GPIO_PERICH_CH2},
+        {GPIO_PERICH_SEL_PWMSEL_1, GPIO_GPC(7UL), GPIO_FUNC(2UL), GPIO_PERICH_CH2},
+        {GPIO_PERICH_SEL_PWMSEL_2, GPIO_GPC(8UL), GPIO_FUNC(2UL), GPIO_PERICH_CH2},
+        {GPIO_PERICH_SEL_PWMSEL_3, GPIO_GPC(9UL), GPIO_FUNC(2UL), GPIO_PERICH_CH2},
+        {GPIO_PERICH_SEL_PWMSEL_4, GPIO_GPC(10UL), GPIO_FUNC(2UL), GPIO_PERICH_CH2},
+        {GPIO_PERICH_SEL_PWMSEL_5, GPIO_GPC(11UL), GPIO_FUNC(2UL), GPIO_PERICH_CH2},
+        {GPIO_PERICH_SEL_PWMSEL_6, GPIO_GPC(12UL), GPIO_FUNC(2UL), GPIO_PERICH_CH2},
+        {GPIO_PERICH_SEL_PWMSEL_7, GPIO_GPC(13UL), GPIO_FUNC(2UL), GPIO_PERICH_CH2},
+        {GPIO_PERICH_SEL_PWMSEL_8, GPIO_GPC(14UL), GPIO_FUNC(2UL), GPIO_PERICH_CH2},
 
-    /* PDM select channel 3 : GPIO-K */
-    { GPIO_PERICH_SEL_PWMSEL_0,     GPIO_GPK(8UL),     GPIO_FUNC(2UL),    GPIO_PERICH_CH3 },
-    { GPIO_PERICH_SEL_PWMSEL_1,     GPIO_GPK(9UL),     GPIO_FUNC(2UL),    GPIO_PERICH_CH3 },
-    { GPIO_PERICH_SEL_PWMSEL_2,     GPIO_GPK(10UL),    GPIO_FUNC(2UL),    GPIO_PERICH_CH3 },
-    { GPIO_PERICH_SEL_PWMSEL_3,     GPIO_GPK(11UL),    GPIO_FUNC(2UL),    GPIO_PERICH_CH3 },
-    { GPIO_PERICH_SEL_PWMSEL_4,     GPIO_GPK(12UL),    GPIO_FUNC(2UL),    GPIO_PERICH_CH3 },
-    { GPIO_PERICH_SEL_PWMSEL_5,     GPIO_GPK(13UL),    GPIO_FUNC(2UL),    GPIO_PERICH_CH3 },
-    { GPIO_PERICH_SEL_PWMSEL_6,     GPIO_GPK(14UL),    GPIO_FUNC(2UL),    GPIO_PERICH_CH3 },
-    { GPIO_PERICH_SEL_PWMSEL_7,     GPIO_GPK(15UL),    GPIO_FUNC(2UL),    GPIO_PERICH_CH3 },
-    { GPIO_PERICH_SEL_PWMSEL_8,     GPIO_GPK(16UL),    GPIO_FUNC(2UL),    GPIO_PERICH_CH3 }
-};
+        /* PDM select channel 3 : GPIO-K */
+        {GPIO_PERICH_SEL_PWMSEL_0, GPIO_GPK(8UL), GPIO_FUNC(2UL), GPIO_PERICH_CH3},
+        {GPIO_PERICH_SEL_PWMSEL_1, GPIO_GPK(9UL), GPIO_FUNC(2UL), GPIO_PERICH_CH3},
+        {GPIO_PERICH_SEL_PWMSEL_2, GPIO_GPK(10UL), GPIO_FUNC(2UL), GPIO_PERICH_CH3},
+        {GPIO_PERICH_SEL_PWMSEL_3, GPIO_GPK(11UL), GPIO_FUNC(2UL), GPIO_PERICH_CH3},
+        {GPIO_PERICH_SEL_PWMSEL_4, GPIO_GPK(12UL), GPIO_FUNC(2UL), GPIO_PERICH_CH3},
+        {GPIO_PERICH_SEL_PWMSEL_5, GPIO_GPK(13UL), GPIO_FUNC(2UL), GPIO_PERICH_CH3},
+        {GPIO_PERICH_SEL_PWMSEL_6, GPIO_GPK(14UL), GPIO_FUNC(2UL), GPIO_PERICH_CH3},
+        {GPIO_PERICH_SEL_PWMSEL_7, GPIO_GPK(15UL), GPIO_FUNC(2UL), GPIO_PERICH_CH3},
+        {GPIO_PERICH_SEL_PWMSEL_8, GPIO_GPK(16UL), GPIO_FUNC(2UL), GPIO_PERICH_CH3}};
 
 /*
 ***************************************************************************************************
 *                                         FUNCTION PROTOTYPES
 ***************************************************************************************************
 */
-static SALRetCode_t PMM_EnableMonitoring
-(
-    uint32                              uiChannel,
-    uint32                              uiConnectionSelect,
-    uint32                              uiCommissionErrorCheck
-);
+static SALRetCode_t PMM_EnableMonitoring(
+    uint32 uiChannel,
+    uint32 uiConnectionSelect,
+    uint32 uiCommissionErrorCheck);
 
-static SALRetCode_t PMM_SetConfig
-(
-    uint32                              uiChannel
-);
+static SALRetCode_t PMM_SetConfig(
+    uint32 uiChannel);
 
-static SALRetCode_t PDM_WaitForIdleStatus
-(
-    uint32                              uiChannel
-);
+static SALRetCode_t PDM_WaitForIdleStatus(
+    uint32 uiChannel);
 
 /*
 ***************************************************************************************************
@@ -150,19 +142,16 @@ static SALRetCode_t PDM_WaitForIdleStatus
 *
 ***************************************************************************************************
 */
-static void PDM_Delay1u
-(
-    uint32                              uiTime
-)
+static void PDM_Delay1u(
+    uint32 uiTime)
 {
-    uint32          uiDelayCnt      = 0;
+    uint32 uiDelayCnt = 0;
 
     for (uiDelayCnt = 0; uiDelayCnt < uiTime; uiDelayCnt++)
     {
-         BSP_NOP_DELAY();
+        BSP_NOP_DELAY();
     }
 }
-
 
 /*
 ***************************************************************************************************
@@ -177,21 +166,19 @@ static void PDM_Delay1u
 *
 ***************************************************************************************************
 */
-static SALRetCode_t PDM_WaitForIdleStatus
-(
-    uint32                              uiChannel
-)
+static SALRetCode_t PDM_WaitForIdleStatus(
+    uint32 uiChannel)
 {
-    uint32          uiDelayCnt      = 0x3FFFFUL;
-    SALRetCode_t    ret             = SAL_RET_FAILED;
+    uint32 uiDelayCnt = 0x3FFFFUL;
+    SALRetCode_t ret = SAL_RET_FAILED;
 
-    if(uiChannel < PDM_OUT_CH_MAX)
+    if (uiChannel < PDM_OUT_CH_MAX)
     {
-        while(uiDelayCnt > 0UL) /* QAC */
+        while (uiDelayCnt > 0UL) /* QAC */
         {
             uiDelayCnt--;
 
-            if(PDM_GetChannelStatus(uiChannel) == PDM_OFF)
+            if (PDM_GetChannelStatus(uiChannel) == PDM_OFF)
             {
                 break;
             }
@@ -202,8 +189,6 @@ static SALRetCode_t PDM_WaitForIdleStatus
 
     return ret;
 }
-
-
 
 /******************************************************************************
  * PDM Mornitoring for Safety Features, PMM
@@ -223,16 +208,14 @@ static SALRetCode_t PDM_WaitForIdleStatus
 *
 ***************************************************************************************************
 */
-static SALRetCode_t PMM_EnableProcess
-(
-    uint32                              uiChannel
-)
+static SALRetCode_t PMM_EnableProcess(
+    uint32 uiChannel)
 {
-    SALRetCode_t    ret             = SAL_RET_FAILED;
+    SALRetCode_t ret = SAL_RET_FAILED;
 
-    if(uiChannel < PDM_OUT_CH_MAX)
+    if (uiChannel < PDM_OUT_CH_MAX)
     {
-        if(PDM_GetChannelStatus(uiChannel) == PDM_ON)
+        if (PDM_GetChannelStatus(uiChannel) == PDM_ON)
         {
             (void)PDM_Disable(uiChannel, (uint32)PMM_ON);
             (void)PDM_WaitForIdleStatus(uiChannel);
@@ -262,28 +245,26 @@ static SALRetCode_t PMM_EnableProcess
 *
 ***************************************************************************************************
 */
-static SALRetCode_t PMM_SetDutyMarginValue
-(
-    uint32                              uiChannel,
-    uint32                              uiNoiseFilterValue,
-    uint32                              uiDutyMarginValue
-)
+static SALRetCode_t PMM_SetDutyMarginValue(
+    uint32 uiChannel,
+    uint32 uiNoiseFilterValue,
+    uint32 uiDutyMarginValue)
 {
-    uint32          uiVal           = 0;
-    uint32          uiReg           = 0;
-    uint32          uiModuleId      = 0;
-    uint32          uiChannelId     = 0;
-    SALRetCode_t    ret             = SAL_RET_FAILED;
+    uint32 uiVal = 0;
+    uint32 uiReg = 0;
+    uint32 uiModuleId = 0;
+    uint32 uiChannelId = 0;
+    SALRetCode_t ret = SAL_RET_FAILED;
 
-    if(uiChannel < PDM_OUT_CH_MAX)
+    if (uiChannel < PDM_OUT_CH_MAX)
     {
-        uiModuleId   = PDMHandler[uiChannel].chModuleId;
-        uiChannelId  = PDMHandler[uiChannel].chChannelId;
+        uiModuleId = PDMHandler[uiChannel].chModuleId;
+        uiChannelId = PDMHandler[uiChannel].chChannelId;
 
-        if((uiModuleId < PDM_TOTAL_MODULES) && (uiChannelId < PDM_TOTAL_CH_PER_MODULE))
+        if ((uiModuleId < PDM_TOTAL_MODULES) && (uiChannelId < PDM_TOTAL_CH_PER_MODULE))
         {
             uiReg = PMM_BASE + (uiModuleId * PMM_MODULE_OFFSET) + PMM_GetPMMDutyMarginReg(uiChannelId);
-            uiVal = (uiNoiseFilterValue << PMM_FLT_VAL_OFFSET) |(uiDutyMarginValue << PMM_DUTY_MARGIN_OFFSET);
+            uiVal = (uiNoiseFilterValue << PMM_FLT_VAL_OFFSET) | (uiDutyMarginValue << PMM_DUTY_MARGIN_OFFSET);
             SAL_WriteReg(uiVal, uiReg);
             ret = SAL_RET_SUCCESS;
         }
@@ -305,23 +286,21 @@ static SALRetCode_t PMM_SetDutyMarginValue
 *
 ***************************************************************************************************
 */
-static SALRetCode_t PMM_SetTimeoutValue
-(
-    uint32                              uiChannel,
-    uint32                              uiTimeoutValue
-)
+static SALRetCode_t PMM_SetTimeoutValue(
+    uint32 uiChannel,
+    uint32 uiTimeoutValue)
 {
-    uint32          uiReg           = 0;
-    uint32          uiModuleId      = 0;
-    uint32          uiChannelId     = 0;
-    SALRetCode_t    ret             = SAL_RET_FAILED;
+    uint32 uiReg = 0;
+    uint32 uiModuleId = 0;
+    uint32 uiChannelId = 0;
+    SALRetCode_t ret = SAL_RET_FAILED;
 
-    if(uiChannel < PDM_OUT_CH_MAX)
+    if (uiChannel < PDM_OUT_CH_MAX)
     {
-        uiModuleId   = PDMHandler[uiChannel].chModuleId;
-        uiChannelId  = PDMHandler[uiChannel].chChannelId;
+        uiModuleId = PDMHandler[uiChannel].chModuleId;
+        uiChannelId = PDMHandler[uiChannel].chChannelId;
 
-        if((uiModuleId < PDM_TOTAL_MODULES) && (uiChannelId < PDM_TOTAL_CH_PER_MODULE))
+        if ((uiModuleId < PDM_TOTAL_MODULES) && (uiChannelId < PDM_TOTAL_CH_PER_MODULE))
         {
             uiReg = PMM_BASE + (uiModuleId * PMM_MODULE_OFFSET) + PMM_GetPMMTimeoutValueReg(uiChannelId);
             SAL_WriteReg(uiTimeoutValue, uiReg);
@@ -346,29 +325,27 @@ static SALRetCode_t PMM_SetTimeoutValue
 *
 ***************************************************************************************************
 */
-static SALRetCode_t PMM_EnableMonitoring
-(
-    uint32                              uiChannel,
-    uint32                              uiConnectionSelect,
-    uint32                              uiCommissionErrorCheck
-)
+static SALRetCode_t PMM_EnableMonitoring(
+    uint32 uiChannel,
+    uint32 uiConnectionSelect,
+    uint32 uiCommissionErrorCheck)
 {
-    uint32          uiVal           = 0;
-    uint32          uiModuleId      = 0;
-    uint32          uiChannelId     = 0;
-    uint32          uiPmmPdmEnReg   = 0;
-    uint32          uiPmmCtrlReg    = 0;
-    SALRetCode_t    ret             = SAL_RET_FAILED;
+    uint32 uiVal = 0;
+    uint32 uiModuleId = 0;
+    uint32 uiChannelId = 0;
+    uint32 uiPmmPdmEnReg = 0;
+    uint32 uiPmmCtrlReg = 0;
+    SALRetCode_t ret = SAL_RET_FAILED;
 
-    if(uiChannel < PDM_OUT_CH_MAX)
+    if (uiChannel < PDM_OUT_CH_MAX)
     {
-        uiModuleId   = PDMHandler[uiChannel].chModuleId;
-        uiChannelId  = PDMHandler[uiChannel].chChannelId;
+        uiModuleId = PDMHandler[uiChannel].chModuleId;
+        uiChannelId = PDMHandler[uiChannel].chChannelId;
 
-        if((uiModuleId < PDM_TOTAL_MODULES) && (uiChannelId < PDM_TOTAL_CH_PER_MODULE))
+        if ((uiModuleId < PDM_TOTAL_MODULES) && (uiChannelId < PDM_TOTAL_CH_PER_MODULE))
         {
             /* Set PDM Monitoring Module Enable (PMM_CTRL) */
-            uiPmmCtrlReg  = PMM_BASE + PMM_CTRL_REG_OFFSET + (uiModuleId * PMM_MODULE_OFFSET);
+            uiPmmCtrlReg = PMM_BASE + PMM_CTRL_REG_OFFSET + (uiModuleId * PMM_MODULE_OFFSET);
 
             uiVal = SAL_ReadReg(uiPmmCtrlReg);
 
@@ -382,22 +359,21 @@ static SALRetCode_t PMM_EnableMonitoring
             /* Set PMM_CM_EN , Commission error check enable */
             uiVal |= ((uiCommissionErrorCheck > 0UL) ? ((uint32)PMM_ON) : ((uint32)PMM_OFF)) << (uint32)PMM_GetPMMCtrlPmmCMENReg(uiChannelId);
 
-            SAL_WriteReg(uiVal , uiPmmCtrlReg);
-
+            SAL_WriteReg(uiVal, uiPmmCtrlReg);
 
             /* Set PDM Mornitoring Module Operation Enable (PMM_PDMEN) */
             uiPmmPdmEnReg = PMM_BASE + PMM_PDMEN_REG_OFFSET + (uiModuleId * PMM_MODULE_OFFSET);
 
             /* Set PMM_EN enable (PMM_CTRL) */
-            uiVal = SAL_ReadReg(uiPmmCtrlReg) | ((uint32)0x1UL<<(PMM_GetPMMCtrlPmmEnReg(uiChannelId)));
+            uiVal = SAL_ReadReg(uiPmmCtrlReg) | ((uint32)0x1UL << (PMM_GetPMMCtrlPmmEnReg(uiChannelId)));
             SAL_WriteReg(uiVal, uiPmmCtrlReg);
 
             /* Set PMM_PDM_EN enable (PMM_PDMEN) */
-            uiVal = SAL_ReadReg(uiPmmPdmEnReg) | ((uint32)0x1UL<<(PMM_GetPDMENEnableReg(uiChannelId)));
+            uiVal = SAL_ReadReg(uiPmmPdmEnReg) | ((uint32)0x1UL << (PMM_GetPDMENEnableReg(uiChannelId)));
             SAL_WriteReg(uiVal, uiPmmPdmEnReg);
 
             /* Set PMM_TRIG enable (PMM_CTRL) */
-            uiVal = SAL_ReadReg(uiPmmCtrlReg) | ((uint32)0x1UL<<(PMM_GetPMMCtrlPmmTRIGReg(uiChannelId)));
+            uiVal = SAL_ReadReg(uiPmmCtrlReg) | ((uint32)0x1UL << (PMM_GetPMMCtrlPmmTRIGReg(uiChannelId)));
             SAL_WriteReg(uiVal, uiPmmCtrlReg);
 
             PDMHandler[uiChannel].chPMMEnable = PMM_ON;
@@ -421,33 +397,31 @@ static SALRetCode_t PMM_EnableMonitoring
 *
 ***************************************************************************************************
 */
-static SALRetCode_t PMM_DisableMonitoring
-(
-    uint32                              uiChannel
-)
+static SALRetCode_t PMM_DisableMonitoring(
+    uint32 uiChannel)
 {
-    uint32          uiVal           = 0;
-    uint32          uiModuleId      = 0;
-    uint32          uiChannelId     = 0;
-    uint32          uiPmmPdmEnReg   = 0;
-    uint32          uiPmmCtrlReg    = 0;
-    SALRetCode_t    ret             = SAL_RET_FAILED;
+    uint32 uiVal = 0;
+    uint32 uiModuleId = 0;
+    uint32 uiChannelId = 0;
+    uint32 uiPmmPdmEnReg = 0;
+    uint32 uiPmmCtrlReg = 0;
+    SALRetCode_t ret = SAL_RET_FAILED;
 
-    if(uiChannel < PDM_OUT_CH_MAX)
+    if (uiChannel < PDM_OUT_CH_MAX)
     {
-        uiModuleId   = PDMHandler[uiChannel].chModuleId;
-        uiChannelId  = PDMHandler[uiChannel].chChannelId;
+        uiModuleId = PDMHandler[uiChannel].chModuleId;
+        uiChannelId = PDMHandler[uiChannel].chChannelId;
 
-        if((uiModuleId < PDM_TOTAL_MODULES) && (uiChannelId < PDM_TOTAL_CH_PER_MODULE))
+        if ((uiModuleId < PDM_TOTAL_MODULES) && (uiChannelId < PDM_TOTAL_CH_PER_MODULE))
         {
             /* clear pmm_ctrl pdm monitoring module enable register */
-            uiPmmCtrlReg  = PMM_BASE + PMM_CTRL_REG_OFFSET + (uiModuleId * PMM_MODULE_OFFSET);
-            uiVal = SAL_ReadReg(uiPmmCtrlReg) & ~((uint32)0x1UL<<(PMM_GetPMMCtrlPmmEnReg(uiChannelId)));
+            uiPmmCtrlReg = PMM_BASE + PMM_CTRL_REG_OFFSET + (uiModuleId * PMM_MODULE_OFFSET);
+            uiVal = SAL_ReadReg(uiPmmCtrlReg) & ~((uint32)0x1UL << (PMM_GetPMMCtrlPmmEnReg(uiChannelId)));
             SAL_WriteReg(uiVal, uiPmmCtrlReg);
 
             /* clear pmm_pdmen pmm operation enable register */
             uiPmmPdmEnReg = PMM_BASE + PMM_PDMEN_REG_OFFSET + (uiModuleId * PMM_MODULE_OFFSET);
-            uiVal = SAL_ReadReg(uiPmmPdmEnReg) & ~((uint32)0x1UL<<(PMM_GetPDMENEnableReg(uiChannelId)));
+            uiVal = SAL_ReadReg(uiPmmPdmEnReg) & ~((uint32)0x1UL << (PMM_GetPDMENEnableReg(uiChannelId)));
             SAL_WriteReg(uiVal, uiPmmPdmEnReg);
 
             PDMHandler[uiChannel].chPMMEnable = PMM_OFF;
@@ -471,38 +445,35 @@ static SALRetCode_t PMM_DisableMonitoring
 *
 ***************************************************************************************************
 */
-static SALRetCode_t PMM_SetConfig
-(
-    uint32                              uiChannel
-)
+static SALRetCode_t PMM_SetConfig(
+    uint32 uiChannel)
 {
-    uint32          uiVal           = 0;
-    uint32          uiModuleId      = 0;
-    uint32          uiChannelId     = 0;
+    uint32 uiVal = 0;
+    uint32 uiModuleId = 0;
+    uint32 uiChannelId = 0;
 
-    uint32          uiOpModeReg     = 0;
-    uint32          uiPstn1Reg      = 0;
-    uint32          uiPstn2Reg      = 0;
-    uint32          uiPstn3Reg      = 0;
-    uint32          uiPstn4Reg      = 0;
-    uint32          uiOutPtn1Reg    = 0;
-    uint32          uiOutPtn2Reg    = 0;
-    uint32          uiOutPtn3Reg    = 0;
-    uint32          uiOutPtn4Reg    = 0;
-    uint32          uiMaxCntReg     = 0;
+    uint32 uiOpModeReg = 0;
+    uint32 uiPstn1Reg = 0;
+    uint32 uiPstn2Reg = 0;
+    uint32 uiPstn3Reg = 0;
+    uint32 uiPstn4Reg = 0;
+    uint32 uiOutPtn1Reg = 0;
+    uint32 uiOutPtn2Reg = 0;
+    uint32 uiOutPtn3Reg = 0;
+    uint32 uiOutPtn4Reg = 0;
+    uint32 uiMaxCntReg = 0;
 
+    SALRetCode_t ret = SAL_RET_FAILED;
 
-    SALRetCode_t    ret             = SAL_RET_FAILED;
-
-    if(uiChannel < PDM_OUT_CH_MAX)
+    if (uiChannel < PDM_OUT_CH_MAX)
     {
-        uiModuleId   = PDMHandler[uiChannel].chModuleId;
-        uiChannelId  = PDMHandler[uiChannel].chChannelId;
+        uiModuleId = PDMHandler[uiChannel].chModuleId;
+        uiChannelId = PDMHandler[uiChannel].chChannelId;
 
-        if((uiModuleId < PDM_TOTAL_MODULES) && (uiChannelId < PDM_TOTAL_CH_PER_MODULE))
+        if ((uiModuleId < PDM_TOTAL_MODULES) && (uiChannelId < PDM_TOTAL_CH_PER_MODULE))
         {
             (void)PMM_SetDutyMarginValue(uiChannel, 0x00U, PDMHandler[uiChannel].chPMMDutyMargin);
-            (void)PMM_SetTimeoutValue   (uiChannel, PDMHandler[uiChannel].chPMMTimeoutValue);
+            (void)PMM_SetTimeoutValue(uiChannel, PDMHandler[uiChannel].chPMMTimeoutValue);
 
             uiOpModeReg = PMM_BASE + PDM_OP_MODE_REG_OFFSET + (uiModuleId * PMM_MODULE_OFFSET);
             uiVal = SAL_ReadReg(uiOpModeReg);
@@ -512,87 +483,86 @@ static SALRetCode_t PMM_SetConfig
             /* Set PDMM Mode Register (OP_MODE) */
             /* operation mode (MODE_X) */
             uiVal = (uiVal & ~(0xFUL << PDM_GetOPModeOperationModeReg(uiChannelId))) |
-                  (uint32)(PDMHandler[uiChannel].chModeCfgInfo.mcOperationMode << PDM_GetOPModeOperationModeReg(uiChannelId));
+                    (uint32)(PDMHandler[uiChannel].chModeCfgInfo.mcOperationMode << PDM_GetOPModeOperationModeReg(uiChannelId));
 
             /* Output signal inverse (INV_X) */
             uiVal = ((uiVal & ~(0x1UL << PDM_GetOPModeSignalInverseReg(uiChannelId))) |
-                  ((uint32)(PDMHandler[uiChannel].chModeCfgInfo.mcInversedSignal << PDM_GetOPModeSignalInverseReg(uiChannelId))));
+                     ((uint32)(PDMHandler[uiChannel].chModeCfgInfo.mcInversedSignal << PDM_GetOPModeSignalInverseReg(uiChannelId))));
 
             /* Output signal in idle state only for phase mode 1 & 2 (IDLE_X) */
             uiVal = ((uiVal & ~(0x1UL << PDM_GetOPModeOutputIdleReg(uiChannelId))) |
-                  ((uint32)(PDMHandler[uiChannel].chOutSignalInIdle << PDM_GetOPModeOutputIdleReg(uiChannelId))));
+                     ((uint32)(PDMHandler[uiChannel].chOutSignalInIdle << PDM_GetOPModeOutputIdleReg(uiChannelId))));
 
             /* Input clock divide (DIV_X) */
             uiVal = ((uiVal & ~(0x3UL << PDM_GetOPModeClockDivideReg(uiChannelId))) |
-                  (uint32)(PDMHandler[uiChannel].chModeCfgInfo.mcClockDivide << PDM_GetOPModeClockDivideReg(uiChannelId)));
+                     (uint32)(PDMHandler[uiChannel].chModeCfgInfo.mcClockDivide << PDM_GetOPModeClockDivideReg(uiChannelId)));
 
             SAL_WriteReg(uiVal, uiOpModeReg);
 
             /* Set Output count or pattern value according to PDM_OUTPUT_MODE */
-            switch(PDMHandler[uiChannel].chModeCfgInfo.mcOperationMode)
+            switch (PDMHandler[uiChannel].chModeCfgInfo.mcOperationMode)
             {
-                case PDM_OUTPUT_MODE_PHASE_1 :
-                    uiPstn1Reg = PMM_BASE + (uiModuleId * PMM_MODULE_OFFSET) + PDM_GetPSTN1Reg(uiChannelId);
-                    uiPstn2Reg = PMM_BASE + (uiModuleId * PMM_MODULE_OFFSET) + PDM_GetPSTN2Reg(uiChannelId);
+            case PDM_OUTPUT_MODE_PHASE_1:
+                uiPstn1Reg = PMM_BASE + (uiModuleId * PMM_MODULE_OFFSET) + PDM_GetPSTN1Reg(uiChannelId);
+                uiPstn2Reg = PMM_BASE + (uiModuleId * PMM_MODULE_OFFSET) + PDM_GetPSTN2Reg(uiChannelId);
 
-                    SAL_WriteReg(PDMHandler[uiChannel].chModeCfgInfo.mcPosition1, uiPstn1Reg);
-                    SAL_WriteReg(PDMHandler[uiChannel].chModeCfgInfo.mcPosition2, uiPstn2Reg);
-                    break;
+                SAL_WriteReg(PDMHandler[uiChannel].chModeCfgInfo.mcPosition1, uiPstn1Reg);
+                SAL_WriteReg(PDMHandler[uiChannel].chModeCfgInfo.mcPosition2, uiPstn2Reg);
+                break;
 
-                case PDM_OUTPUT_MODE_PHASE_2 :
-                    uiPstn1Reg = PMM_BASE + (uiModuleId * PMM_MODULE_OFFSET) + PDM_GetPSTN1Reg(uiChannelId);
-                    uiPstn2Reg = PMM_BASE + (uiModuleId * PMM_MODULE_OFFSET) + PDM_GetPSTN2Reg(uiChannelId);
-                    uiPstn3Reg = PMM_BASE + (uiModuleId * PMM_MODULE_OFFSET) + PDM_GetPSTN3Reg(uiChannelId);
-                    uiPstn4Reg = PMM_BASE + (uiModuleId * PMM_MODULE_OFFSET) + PDM_GetPSTN4Reg(uiChannelId);
+            case PDM_OUTPUT_MODE_PHASE_2:
+                uiPstn1Reg = PMM_BASE + (uiModuleId * PMM_MODULE_OFFSET) + PDM_GetPSTN1Reg(uiChannelId);
+                uiPstn2Reg = PMM_BASE + (uiModuleId * PMM_MODULE_OFFSET) + PDM_GetPSTN2Reg(uiChannelId);
+                uiPstn3Reg = PMM_BASE + (uiModuleId * PMM_MODULE_OFFSET) + PDM_GetPSTN3Reg(uiChannelId);
+                uiPstn4Reg = PMM_BASE + (uiModuleId * PMM_MODULE_OFFSET) + PDM_GetPSTN4Reg(uiChannelId);
 
-                    SAL_WriteReg(PDMHandler[uiChannel].chModeCfgInfo.mcPosition1, uiPstn1Reg);
-                    SAL_WriteReg(PDMHandler[uiChannel].chModeCfgInfo.mcPosition2, uiPstn2Reg);
-                    SAL_WriteReg(PDMHandler[uiChannel].chModeCfgInfo.mcPosition3, uiPstn3Reg);
-                    SAL_WriteReg(PDMHandler[uiChannel].chModeCfgInfo.mcPosition4, uiPstn4Reg);
-                    break;
+                SAL_WriteReg(PDMHandler[uiChannel].chModeCfgInfo.mcPosition1, uiPstn1Reg);
+                SAL_WriteReg(PDMHandler[uiChannel].chModeCfgInfo.mcPosition2, uiPstn2Reg);
+                SAL_WriteReg(PDMHandler[uiChannel].chModeCfgInfo.mcPosition3, uiPstn3Reg);
+                SAL_WriteReg(PDMHandler[uiChannel].chModeCfgInfo.mcPosition4, uiPstn4Reg);
+                break;
 
-                case PDM_OUTPUT_MODE_REGISTER_1 :
-                    uiOutPtn1Reg = PMM_BASE + (uiModuleId * PMM_MODULE_OFFSET) + PDM_GetOutPTN1Reg(uiChannelId);
+            case PDM_OUTPUT_MODE_REGISTER_1:
+                uiOutPtn1Reg = PMM_BASE + (uiModuleId * PMM_MODULE_OFFSET) + PDM_GetOutPTN1Reg(uiChannelId);
 
-                    SAL_WriteReg(PDMHandler[uiChannel].chModeCfgInfo.mcOutPattern1, uiOutPtn1Reg);
-                    break;
+                SAL_WriteReg(PDMHandler[uiChannel].chModeCfgInfo.mcOutPattern1, uiOutPtn1Reg);
+                break;
 
-                case PDM_OUTPUT_MODE_REGISTER_2 :
-                    uiOutPtn1Reg = PMM_BASE + (uiModuleId * PMM_MODULE_OFFSET) + PDM_GetOutPTN1Reg(uiChannelId);
-                    uiOutPtn2Reg = PMM_BASE + (uiModuleId * PMM_MODULE_OFFSET) + PDM_GetOutPTN2Reg(uiChannelId);
-                    uiOutPtn3Reg = PMM_BASE + (uiModuleId * PMM_MODULE_OFFSET) + PDM_GetOutPTN3Reg(uiChannelId);
-                    uiOutPtn4Reg = PMM_BASE + (uiModuleId * PMM_MODULE_OFFSET) + PDM_GetOutPTN4Reg(uiChannelId);
+            case PDM_OUTPUT_MODE_REGISTER_2:
+                uiOutPtn1Reg = PMM_BASE + (uiModuleId * PMM_MODULE_OFFSET) + PDM_GetOutPTN1Reg(uiChannelId);
+                uiOutPtn2Reg = PMM_BASE + (uiModuleId * PMM_MODULE_OFFSET) + PDM_GetOutPTN2Reg(uiChannelId);
+                uiOutPtn3Reg = PMM_BASE + (uiModuleId * PMM_MODULE_OFFSET) + PDM_GetOutPTN3Reg(uiChannelId);
+                uiOutPtn4Reg = PMM_BASE + (uiModuleId * PMM_MODULE_OFFSET) + PDM_GetOutPTN4Reg(uiChannelId);
 
-                    SAL_WriteReg(PDMHandler[uiChannel].chModeCfgInfo.mcOutPattern1, uiOutPtn1Reg);
-                    SAL_WriteReg(PDMHandler[uiChannel].chModeCfgInfo.mcOutPattern2, uiOutPtn2Reg);
-                    SAL_WriteReg(PDMHandler[uiChannel].chModeCfgInfo.mcOutPattern3, uiOutPtn3Reg);
-                    SAL_WriteReg(PDMHandler[uiChannel].chModeCfgInfo.mcOutPattern4, uiOutPtn4Reg);
-                    break;
+                SAL_WriteReg(PDMHandler[uiChannel].chModeCfgInfo.mcOutPattern1, uiOutPtn1Reg);
+                SAL_WriteReg(PDMHandler[uiChannel].chModeCfgInfo.mcOutPattern2, uiOutPtn2Reg);
+                SAL_WriteReg(PDMHandler[uiChannel].chModeCfgInfo.mcOutPattern3, uiOutPtn3Reg);
+                SAL_WriteReg(PDMHandler[uiChannel].chModeCfgInfo.mcOutPattern4, uiOutPtn4Reg);
+                break;
 
-                case PDM_OUTPUT_MODE_REGISTER_3 :
-                    uiOutPtn1Reg = PMM_BASE + (uiModuleId * PMM_MODULE_OFFSET) + PDM_GetOutPTN1Reg(uiChannelId);
-                    uiOutPtn2Reg = PMM_BASE + (uiModuleId * PMM_MODULE_OFFSET) + PDM_GetOutPTN2Reg(uiChannelId);
-                    uiOutPtn3Reg = PMM_BASE + (uiModuleId * PMM_MODULE_OFFSET) + PDM_GetOutPTN3Reg(uiChannelId);
-                    uiOutPtn4Reg = PMM_BASE + (uiModuleId * PMM_MODULE_OFFSET) + PDM_GetOutPTN4Reg(uiChannelId);
-                    uiMaxCntReg  = PMM_BASE + PDM_MAX_CNT_REG_OFFSET  + (uiModuleId * PMM_MODULE_OFFSET);
+            case PDM_OUTPUT_MODE_REGISTER_3:
+                uiOutPtn1Reg = PMM_BASE + (uiModuleId * PMM_MODULE_OFFSET) + PDM_GetOutPTN1Reg(uiChannelId);
+                uiOutPtn2Reg = PMM_BASE + (uiModuleId * PMM_MODULE_OFFSET) + PDM_GetOutPTN2Reg(uiChannelId);
+                uiOutPtn3Reg = PMM_BASE + (uiModuleId * PMM_MODULE_OFFSET) + PDM_GetOutPTN3Reg(uiChannelId);
+                uiOutPtn4Reg = PMM_BASE + (uiModuleId * PMM_MODULE_OFFSET) + PDM_GetOutPTN4Reg(uiChannelId);
+                uiMaxCntReg = PMM_BASE + PDM_MAX_CNT_REG_OFFSET + (uiModuleId * PMM_MODULE_OFFSET);
 
-                    SAL_WriteReg(PDMHandler[uiChannel].chModeCfgInfo.mcOutPattern1, uiOutPtn1Reg);
-                    SAL_WriteReg(PDMHandler[uiChannel].chModeCfgInfo.mcOutPattern2, uiOutPtn2Reg);
-                    SAL_WriteReg(PDMHandler[uiChannel].chModeCfgInfo.mcOutPattern3, uiOutPtn3Reg);
-                    SAL_WriteReg(PDMHandler[uiChannel].chModeCfgInfo.mcOutPattern4, uiOutPtn4Reg);
+                SAL_WriteReg(PDMHandler[uiChannel].chModeCfgInfo.mcOutPattern1, uiOutPtn1Reg);
+                SAL_WriteReg(PDMHandler[uiChannel].chModeCfgInfo.mcOutPattern2, uiOutPtn2Reg);
+                SAL_WriteReg(PDMHandler[uiChannel].chModeCfgInfo.mcOutPattern3, uiOutPtn3Reg);
+                SAL_WriteReg(PDMHandler[uiChannel].chModeCfgInfo.mcOutPattern4, uiOutPtn4Reg);
 
+                uiVal = SAL_ReadReg(uiMaxCntReg);
+                uiVal = (uiVal & ~(0xFFUL << PDM_GetMaxCountValueReg(uiChannelId))) |
+                        (uint32)(PDMHandler[uiChannel].chModeCfgInfo.mcMaxCount << PDM_GetMaxCountValueReg(uiChannelId));
 
-                    uiVal = SAL_ReadReg(uiMaxCntReg);
-                    uiVal = (uiVal & ~(0xFFUL << PDM_GetMaxCountValueReg(uiChannelId))) |
-                          (uint32)(PDMHandler[uiChannel].chModeCfgInfo.mcMaxCount << PDM_GetMaxCountValueReg(uiChannelId));
+                SAL_WriteReg(uiVal, uiMaxCntReg);
+                break;
 
-                    SAL_WriteReg(uiVal, uiMaxCntReg);
-                    break;
-
-                default :
-                    PDM_Err("PDM Invalid Operation Mode \n");
-                    ret = SAL_RET_FAILED;
-                    break;
+            default:
+                PDM_Err("PDM Invalid Operation Mode \n");
+                ret = SAL_RET_FAILED;
+                break;
             }
         }
     }
@@ -612,13 +582,11 @@ static SALRetCode_t PMM_SetConfig
 *
 ***************************************************************************************************
 */
-static void PMM_PDM0IrqHandler
-(
-    void *                              pArg
-)
+static void PMM_PDM0IrqHandler(
+    void *pArg)
 {
-    uint32          uiReg           = 0;
-    uint32          uiVal           = 0;
+    uint32 uiReg = 0;
+    uint32 uiVal = 0;
 
     (void)pArg;
 
@@ -626,25 +594,25 @@ static void PMM_PDM0IrqHandler
     uiVal = SAL_ReadReg(uiReg);
     (void)FMU_IsrClr((FMUFaultid_t)FMU_ID_PDM0);
 
-    if((uiVal & PMM_FAULT_STS_CH_A_MASK) != (uint32)NULL)
+    if ((uiVal & PMM_FAULT_STS_CH_A_MASK) != (uint32)NULL)
     {
         PDMHandler[0].chPMMErrChannel = TRUE;
         SAL_WriteReg(PMM_FAULT_STS_CH_A_MASK, uiReg);
     }
 
-    if((uiVal & PMM_FAULT_STS_CH_B_MASK) != (uint32)NULL)
+    if ((uiVal & PMM_FAULT_STS_CH_B_MASK) != (uint32)NULL)
     {
         PDMHandler[1].chPMMErrChannel = TRUE;
         SAL_WriteReg(PMM_FAULT_STS_CH_B_MASK, uiReg);
     }
 
-    if((uiVal & PMM_FAULT_STS_CH_C_MASK) != (uint32)NULL)
+    if ((uiVal & PMM_FAULT_STS_CH_C_MASK) != (uint32)NULL)
     {
         PDMHandler[2].chPMMErrChannel = TRUE;
         SAL_WriteReg(PMM_FAULT_STS_CH_C_MASK, uiReg);
     }
 
-    if((uiVal & PMM_FAULT_STS_CH_D_MASK) != (uint32)NULL)
+    if ((uiVal & PMM_FAULT_STS_CH_D_MASK) != (uint32)NULL)
     {
         PDMHandler[3].chPMMErrChannel = TRUE;
         SAL_WriteReg(PMM_FAULT_STS_CH_D_MASK, uiReg);
@@ -663,13 +631,11 @@ static void PMM_PDM0IrqHandler
 *
 ***************************************************************************************************
 */
-static void PMM_PDM1IrqHandler
-(
-    void *                              pArg
-)
+static void PMM_PDM1IrqHandler(
+    void *pArg)
 {
-    uint32          uiReg           = 0;
-    uint32          uiVal           = 0;
+    uint32 uiReg = 0;
+    uint32 uiVal = 0;
 
     (void)pArg;
 
@@ -677,25 +643,25 @@ static void PMM_PDM1IrqHandler
     uiVal = SAL_ReadReg(uiReg);
     (void)FMU_IsrClr((FMUFaultid_t)FMU_ID_PDM1);
 
-    if((uiVal & PMM_FAULT_STS_CH_A_MASK) != (uint32)NULL)
+    if ((uiVal & PMM_FAULT_STS_CH_A_MASK) != (uint32)NULL)
     {
         PDMHandler[4].chPMMErrChannel = TRUE;
         SAL_WriteReg(PMM_FAULT_STS_CH_A_MASK, uiReg);
     }
 
-    if((uiVal & PMM_FAULT_STS_CH_B_MASK) != (uint32)NULL)
+    if ((uiVal & PMM_FAULT_STS_CH_B_MASK) != (uint32)NULL)
     {
         PDMHandler[5].chPMMErrChannel = TRUE;
         SAL_WriteReg(PMM_FAULT_STS_CH_B_MASK, uiReg);
     }
 
-    if((uiVal & PMM_FAULT_STS_CH_C_MASK) != (uint32)NULL)
+    if ((uiVal & PMM_FAULT_STS_CH_C_MASK) != (uint32)NULL)
     {
         PDMHandler[6].chPMMErrChannel = TRUE;
         SAL_WriteReg(PMM_FAULT_STS_CH_C_MASK, uiReg);
     }
 
-    if((uiVal & PMM_FAULT_STS_CH_D_MASK) != (uint32)NULL)
+    if ((uiVal & PMM_FAULT_STS_CH_D_MASK) != (uint32)NULL)
     {
         PDMHandler[7].chPMMErrChannel = TRUE;
         SAL_WriteReg(PMM_FAULT_STS_CH_D_MASK, uiReg);
@@ -714,13 +680,11 @@ static void PMM_PDM1IrqHandler
 *
 ***************************************************************************************************
 */
-static void PMM_PDM2IrqHandler
-(
-    void *                              pArg
-)
+static void PMM_PDM2IrqHandler(
+    void *pArg)
 {
-    uint32          uiReg           = 0;
-    uint32          uiVal           = 0;
+    uint32 uiReg = 0;
+    uint32 uiVal = 0;
 
     (void)pArg;
 
@@ -728,33 +692,31 @@ static void PMM_PDM2IrqHandler
     uiVal = SAL_ReadReg(uiReg);
     (void)FMU_IsrClr((FMUFaultid_t)FMU_ID_PDM2);
 
-    if((uiVal & PMM_FAULT_STS_CH_A_MASK) != (uint32)NULL)
+    if ((uiVal & PMM_FAULT_STS_CH_A_MASK) != (uint32)NULL)
     {
         PDMHandler[8].chPMMErrChannel = TRUE;
         SAL_WriteReg(PMM_FAULT_STS_CH_A_MASK, uiReg);
     }
 
-    if((uiVal & PMM_FAULT_STS_CH_B_MASK) != (uint32)NULL)
+    if ((uiVal & PMM_FAULT_STS_CH_B_MASK) != (uint32)NULL)
     {
         PDMHandler[9].chPMMErrChannel = TRUE;
         SAL_WriteReg(PMM_FAULT_STS_CH_B_MASK, uiReg);
     }
 
-    if((uiVal & PMM_FAULT_STS_CH_C_MASK) != (uint32)NULL)
+    if ((uiVal & PMM_FAULT_STS_CH_C_MASK) != (uint32)NULL)
     {
         PDMHandler[10].chPMMErrChannel = TRUE;
         SAL_WriteReg(PMM_FAULT_STS_CH_C_MASK, uiReg);
     }
 
-    if((uiVal & PMM_FAULT_STS_CH_D_MASK) != (uint32)NULL)
+    if ((uiVal & PMM_FAULT_STS_CH_D_MASK) != (uint32)NULL)
     {
         PDMHandler[11].chPMMErrChannel = TRUE;
         SAL_WriteReg(PMM_FAULT_STS_CH_D_MASK, uiReg);
     }
 }
 #endif
-
-
 
 /*
 ***************************************************************************************************
@@ -776,29 +738,27 @@ static void PMM_PDM2IrqHandler
 *
 ***************************************************************************************************
 */
-static SALRetCode_t PDM_SetOutputInverse
-(
-    uint32                              uiChannel,
-    uint32                              uiOutputInverse
-)
+static SALRetCode_t PDM_SetOutputInverse(
+    uint32 uiChannel,
+    uint32 uiOutputInverse)
 {
-    uint32          uiVal           = 0;
-    uint32          uiModuleId      = 0;
-    uint32          uiChannelId     = 0;
-    uint32          uiOpModeReg     = 0;
-    SALRetCode_t    ret             = SAL_RET_FAILED;
+    uint32 uiVal = 0;
+    uint32 uiModuleId = 0;
+    uint32 uiChannelId = 0;
+    uint32 uiOpModeReg = 0;
+    SALRetCode_t ret = SAL_RET_FAILED;
 
-    if(uiChannel < PDM_OUT_CH_MAX)
+    if (uiChannel < PDM_OUT_CH_MAX)
     {
-        uiModuleId   = PDMHandler[uiChannel].chModuleId;
-        uiChannelId  = PDMHandler[uiChannel].chChannelId;
+        uiModuleId = PDMHandler[uiChannel].chModuleId;
+        uiChannelId = PDMHandler[uiChannel].chChannelId;
 
-        if((uiModuleId < PDM_TOTAL_MODULES) && (uiChannelId < PDM_TOTAL_CH_PER_MODULE))
+        if ((uiModuleId < PDM_TOTAL_MODULES) && (uiChannelId < PDM_TOTAL_CH_PER_MODULE))
         {
             PDMHandler[uiChannel].chModeCfgInfo.mcInversedSignal = uiOutputInverse;
 
             uiOpModeReg = PDM_BASE + PDM_OP_MODE_REG_OFFSET + (uiModuleId * PDM_MODULE_OFFSET);
-            uiVal       = SAL_ReadReg(uiOpModeReg);
+            uiVal = SAL_ReadReg(uiOpModeReg);
 
             /*output_signal, INV_X is set, output signal inversed*/
             uiVal = ((uiVal & ~(0x1UL << PDM_GetOPModeSignalInverseReg(uiChannelId))) |
@@ -827,32 +787,30 @@ static SALRetCode_t PDM_SetOutputInverse
 *
 ***************************************************************************************************
 */
-static SALRetCode_t PDM_SetOutputLoopCount
-(
-    uint32                              uiChannel,
-    uint32                              uiLoopCount
-)
+static SALRetCode_t PDM_SetOutputLoopCount(
+    uint32 uiChannel,
+    uint32 uiLoopCount)
 {
-    uint32          uiVal           = 0;
-    uint32          uiModuleId      = 0;
-    uint32          uiChannelId     = 0;
-    uint32          uiOpStepReg     = 0;
-    SALRetCode_t    ret             = SAL_RET_FAILED;
+    uint32 uiVal = 0;
+    uint32 uiModuleId = 0;
+    uint32 uiChannelId = 0;
+    uint32 uiOpStepReg = 0;
+    SALRetCode_t ret = SAL_RET_FAILED;
 
-    if(uiChannel < PDM_OUT_CH_MAX)
+    if (uiChannel < PDM_OUT_CH_MAX)
     {
-        uiModuleId   = PDMHandler[uiChannel].chModuleId;
-        uiChannelId  = PDMHandler[uiChannel].chChannelId;
+        uiModuleId = PDMHandler[uiChannel].chModuleId;
+        uiChannelId = PDMHandler[uiChannel].chChannelId;
 
-        if((uiModuleId < PDM_TOTAL_MODULES) && (uiChannelId < PDM_TOTAL_CH_PER_MODULE))
+        if ((uiModuleId < PDM_TOTAL_MODULES) && (uiChannelId < PDM_TOTAL_CH_PER_MODULE))
         {
             PDMHandler[uiChannel].chModeCfgInfo.mcLoopCount = uiLoopCount;
 
-            uiOpStepReg    = PDM_BASE + PDM_OP_STEP_REG_OFFSET + (uiModuleId * PDM_MODULE_OFFSET);
+            uiOpStepReg = PDM_BASE + PDM_OP_STEP_REG_OFFSET + (uiModuleId * PDM_MODULE_OFFSET);
             uiVal = SAL_ReadReg(uiOpStepReg);
 
             uiVal = uiVal & ~(0xFUL << (PDM_GetOPStepLoopCountReg(uiChannelId)));
-            uiVal = uiVal |(uiLoopCount << (PDM_GetOPStepLoopCountReg(uiChannelId)));
+            uiVal = uiVal | (uiLoopCount << (PDM_GetOPStepLoopCountReg(uiChannelId)));
             SAL_WriteReg(uiVal, uiOpStepReg);
 
             ret = SAL_RET_SUCCESS;
@@ -876,29 +834,27 @@ static SALRetCode_t PDM_SetOutputLoopCount
 *
 ***************************************************************************************************
 */
-static SALRetCode_t PDM_SetOutputInIdleState
-(
-    uint32                              uiChannel,
-    uint32                              uiOutputState
-)
+static SALRetCode_t PDM_SetOutputInIdleState(
+    uint32 uiChannel,
+    uint32 uiOutputState)
 {
-    uint32          uiVal           = 0;
-    uint32          uiModuleId      = 0;
-    uint32          uiChannelId     = 0;
-    uint32          uiOpModeReg     = 0;
-    SALRetCode_t    ret             = SAL_RET_FAILED;
+    uint32 uiVal = 0;
+    uint32 uiModuleId = 0;
+    uint32 uiChannelId = 0;
+    uint32 uiOpModeReg = 0;
+    SALRetCode_t ret = SAL_RET_FAILED;
 
-    if(uiChannel < PDM_OUT_CH_MAX)
+    if (uiChannel < PDM_OUT_CH_MAX)
     {
-        uiModuleId   = PDMHandler[uiChannel].chModuleId;
-        uiChannelId  = PDMHandler[uiChannel].chChannelId;
+        uiModuleId = PDMHandler[uiChannel].chModuleId;
+        uiChannelId = PDMHandler[uiChannel].chChannelId;
 
-        if((uiModuleId < PDM_TOTAL_MODULES) && (uiChannelId < PDM_TOTAL_CH_PER_MODULE))
+        if ((uiModuleId < PDM_TOTAL_MODULES) && (uiChannelId < PDM_TOTAL_CH_PER_MODULE))
         {
             PDMHandler[uiChannel].chOutSignalInIdle = uiOutputState;
 
             uiOpModeReg = PDM_BASE + PDM_OP_MODE_REG_OFFSET + (uiModuleId * PDM_MODULE_OFFSET);
-            uiVal       = SAL_ReadReg(uiOpModeReg);
+            uiVal = SAL_ReadReg(uiOpModeReg);
 
             /*output_signal, IDLE_X is set, output signal in Idle state */
             uiVal = ((uiVal & ~(0x1UL << PDM_GetOPModeOutputIdleReg(uiChannelId))) |
@@ -927,24 +883,22 @@ static SALRetCode_t PDM_SetOutputInIdleState
 *
 ***************************************************************************************************
 */
-static SALRetCode_t PDM_SetCfgOutputControl
-(
-    uint32                              uiChannel,
-    uint32                              uiOutputCtrl
-)
+static SALRetCode_t PDM_SetCfgOutputControl(
+    uint32 uiChannel,
+    uint32 uiOutputCtrl)
 {
-    uint32          uiReg           = 0;
-    uint32          uiVal           = 0;
-    uint32          uiModuleId      = 0;
-    uint32          uiChannelId     = 0;
-    SALRetCode_t    ret             = SAL_RET_FAILED;
+    uint32 uiReg = 0;
+    uint32 uiVal = 0;
+    uint32 uiModuleId = 0;
+    uint32 uiChannelId = 0;
+    SALRetCode_t ret = SAL_RET_FAILED;
 
-    if(uiChannel < PDM_OUT_CH_MAX)
+    if (uiChannel < PDM_OUT_CH_MAX)
     {
-        uiModuleId   = PDMHandler[uiChannel].chModuleId;
-        uiChannelId  = PDMHandler[uiChannel].chChannelId;
+        uiModuleId = PDMHandler[uiChannel].chModuleId;
+        uiChannelId = PDMHandler[uiChannel].chChannelId;
 
-        if((uiModuleId < PDM_TOTAL_MODULES) && (uiChannelId < PDM_TOTAL_CH_PER_MODULE))
+        if ((uiModuleId < PDM_TOTAL_MODULES) && (uiChannelId < PDM_TOTAL_CH_PER_MODULE))
         {
             uiReg = PDM_CFG_BASE + PDM_GetCfgOutCtrlReg(uiModuleId);
             uiVal = SAL_ReadReg(uiReg);
@@ -974,23 +928,21 @@ static SALRetCode_t PDM_SetCfgOutputControl
 *
 ***************************************************************************************************
 */
-static uint8 PDM_GetCfgOutputControl
-(
-    uint32                              uiChannel
-)
+static uint8 PDM_GetCfgOutputControl(
+    uint32 uiChannel)
 {
-    uint8           ucRet           = 0;
-    uint32          uiReg           = 0;
-    uint32          uiVal           = 0;
-    uint32          uiModuleId      = 0;
-    uint32          uiChannelId     = 0;
+    uint8 ucRet = 0;
+    uint32 uiReg = 0;
+    uint32 uiVal = 0;
+    uint32 uiModuleId = 0;
+    uint32 uiChannelId = 0;
 
-    if(uiChannel < PDM_OUT_CH_MAX)
+    if (uiChannel < PDM_OUT_CH_MAX)
     {
-        uiModuleId   = PDMHandler[uiChannel].chModuleId;
-        uiChannelId  = PDMHandler[uiChannel].chChannelId;
+        uiModuleId = PDMHandler[uiChannel].chModuleId;
+        uiChannelId = PDMHandler[uiChannel].chChannelId;
 
-        if((uiModuleId < PDM_TOTAL_MODULES) && (uiChannelId < PDM_TOTAL_CH_PER_MODULE))
+        if ((uiModuleId < PDM_TOTAL_MODULES) && (uiChannelId < PDM_TOTAL_CH_PER_MODULE))
         {
             uiReg = PDM_CFG_BASE + PDM_GetCfgOutCtrlReg(uiModuleId);
             uiVal = SAL_ReadReg(uiReg);
@@ -1016,88 +968,85 @@ static uint8 PDM_GetCfgOutputControl
 *
 ***************************************************************************************************
 */
-static SALRetCode_t PDM_SetRegisterMode
-(
-    uint32                              uiChannel,
-    const PDMModeConfig_t *             pModeConfig
-)
+static SALRetCode_t PDM_SetRegisterMode(
+    uint32 uiChannel,
+    const PDMModeConfig_t *pModeConfig)
 {
-    uint32          uiVal           = 0;
-    uint32          uiModuleId      = 0;
-    uint32          uiChannelId     = 0;
-    uint32          uiOpModeVal     = 0;
-    uint32          uiOpModeReg     = 0;
-    uint32          uiOutPtn1Reg    = 0;
-    uint32          uiOutPtn2Reg    = 0;
-    uint32          uiOutPtn3Reg    = 0;
-    uint32          uiOutPtn4Reg    = 0;
-    uint32          uiMaxCntReg     = 0;
-    uint32          uiClkDivide     = 0;
-    uint32          uiOutPtnValue1  = 0;
-    uint32          uiOutPtnValue2  = 0;
-    uint32          uiOutPtnValue3  = 0;
-    uint32          uiOutPtnValue4  = 0;
-    uint32          uiMaxCnt        = 0;
-    SALRetCode_t    ret             = SAL_RET_SUCCESS;
+    uint32 uiVal = 0;
+    uint32 uiModuleId = 0;
+    uint32 uiChannelId = 0;
+    uint32 uiOpModeVal = 0;
+    uint32 uiOpModeReg = 0;
+    uint32 uiOutPtn1Reg = 0;
+    uint32 uiOutPtn2Reg = 0;
+    uint32 uiOutPtn3Reg = 0;
+    uint32 uiOutPtn4Reg = 0;
+    uint32 uiMaxCntReg = 0;
+    uint32 uiClkDivide = 0;
+    uint32 uiOutPtnValue1 = 0;
+    uint32 uiOutPtnValue2 = 0;
+    uint32 uiOutPtnValue3 = 0;
+    uint32 uiOutPtnValue4 = 0;
+    uint32 uiMaxCnt = 0;
+    SALRetCode_t ret = SAL_RET_SUCCESS;
 
-
-    if(PDM_OUT_CH_MAX <= uiChannel)
+    if (PDM_OUT_CH_MAX <= uiChannel)
     {
         PDM_Err("Invalid channel number \n");
         ret = SAL_RET_FAILED;
     }
-    else if(pModeConfig == (PDMModeConfig_t*)NULL)
+    else if (pModeConfig == (PDMModeConfig_t *)NULL)
     {
         PDM_Err("Invalid configuration pointer \n");
         ret = SAL_RET_FAILED;
     }
     else
     {
-        uiModuleId   = PDMHandler[uiChannel].chModuleId;
-        uiChannelId  = PDMHandler[uiChannel].chChannelId;
+        uiModuleId = PDMHandler[uiChannel].chModuleId;
+        uiChannelId = PDMHandler[uiChannel].chChannelId;
 
-        if((uiModuleId < PDM_TOTAL_MODULES) && (uiChannelId < PDM_TOTAL_CH_PER_MODULE))
+        if ((uiModuleId < PDM_TOTAL_MODULES) && (uiChannelId < PDM_TOTAL_CH_PER_MODULE))
         {
 
-            uiOpModeReg     = PDM_BASE + PDM_OP_MODE_REG_OFFSET + (uiModuleId * PDM_MODULE_OFFSET);
+            uiOpModeReg = PDM_BASE + PDM_OP_MODE_REG_OFFSET + (uiModuleId * PDM_MODULE_OFFSET);
 
-            uiOutPtn1Reg    = PDM_BASE + (uiModuleId * PDM_MODULE_OFFSET) + PDM_GetOutPTN1Reg(uiChannelId);
-            uiOutPtn2Reg    = PDM_BASE + (uiModuleId * PDM_MODULE_OFFSET) + PDM_GetOutPTN2Reg(uiChannelId);
-            uiOutPtn3Reg    = PDM_BASE + (uiModuleId * PDM_MODULE_OFFSET) + PDM_GetOutPTN3Reg(uiChannelId);
-            uiOutPtn4Reg    = PDM_BASE + (uiModuleId * PDM_MODULE_OFFSET) + PDM_GetOutPTN4Reg(uiChannelId);
-            uiMaxCntReg     = PDM_BASE + PDM_MAX_CNT_REG_OFFSET + (uiModuleId * PDM_MODULE_OFFSET);
+            uiOutPtn1Reg = PDM_BASE + (uiModuleId * PDM_MODULE_OFFSET) + PDM_GetOutPTN1Reg(uiChannelId);
+            uiOutPtn2Reg = PDM_BASE + (uiModuleId * PDM_MODULE_OFFSET) + PDM_GetOutPTN2Reg(uiChannelId);
+            uiOutPtn3Reg = PDM_BASE + (uiModuleId * PDM_MODULE_OFFSET) + PDM_GetOutPTN3Reg(uiChannelId);
+            uiOutPtn4Reg = PDM_BASE + (uiModuleId * PDM_MODULE_OFFSET) + PDM_GetOutPTN4Reg(uiChannelId);
+            uiMaxCntReg = PDM_BASE + PDM_MAX_CNT_REG_OFFSET + (uiModuleId * PDM_MODULE_OFFSET);
 
             uiVal = SAL_ReadReg(uiOpModeReg);
 
-            uiOpModeVal     = pModeConfig->mcOperationMode;
-            uiClkDivide     = pModeConfig->mcClockDivide;
-            uiOutPtnValue1  = pModeConfig->mcOutPattern1;
-            uiOutPtnValue2  = pModeConfig->mcOutPattern2;
-            uiOutPtnValue3  = pModeConfig->mcOutPattern3;
-            uiOutPtnValue4  = pModeConfig->mcOutPattern4;
-            uiMaxCnt        = pModeConfig->mcMaxCount;
+            uiOpModeVal = pModeConfig->mcOperationMode;
+            uiClkDivide = pModeConfig->mcClockDivide;
+            uiOutPtnValue1 = pModeConfig->mcOutPattern1;
+            uiOutPtnValue2 = pModeConfig->mcOutPattern2;
+            uiOutPtnValue3 = pModeConfig->mcOutPattern3;
+            uiOutPtnValue4 = pModeConfig->mcOutPattern4;
+            uiMaxCnt = pModeConfig->mcMaxCount;
 
-            if((((uiVal >> PDM_GetOPModeOperationModeReg(uiChannelId)) & 0xFU) != (uiOpModeVal)) &&
-                 (PDMHandler[uiChannel].chEnable == PDM_ON))
+            if ((((uiVal >> PDM_GetOPModeOperationModeReg(uiChannelId)) & 0xFU) != (uiOpModeVal)) &&
+                (PDMHandler[uiChannel].chEnable == PDM_ON))
             {
                 (void)PDM_Disable(uiChannel, PMM_ON);
                 (void)PDM_WaitForIdleStatus(uiChannel);
             }
             PDMHandler[uiChannel].chModeCfgInfo.mcOperationMode = uiOpModeVal;
-            PDMHandler[uiChannel].chModeCfgInfo.mcClockDivide   = uiClkDivide;
-            PDMHandler[uiChannel].chModeCfgInfo.mcOutPattern1   = uiOutPtnValue1;
-            PDMHandler[uiChannel].chModeCfgInfo.mcOutPattern2   = uiOutPtnValue2;
-            PDMHandler[uiChannel].chModeCfgInfo.mcOutPattern3   = uiOutPtnValue3;
-            PDMHandler[uiChannel].chModeCfgInfo.mcOutPattern4   = uiOutPtnValue4;
-            PDMHandler[uiChannel].chModeCfgInfo.mcMaxCount      = uiMaxCnt;
+            PDMHandler[uiChannel].chModeCfgInfo.mcClockDivide = uiClkDivide;
+            PDMHandler[uiChannel].chModeCfgInfo.mcOutPattern1 = uiOutPtnValue1;
+            PDMHandler[uiChannel].chModeCfgInfo.mcOutPattern2 = uiOutPtnValue2;
+            PDMHandler[uiChannel].chModeCfgInfo.mcOutPattern3 = uiOutPtnValue3;
+            PDMHandler[uiChannel].chModeCfgInfo.mcOutPattern4 = uiOutPtnValue4;
+            PDMHandler[uiChannel].chModeCfgInfo.mcMaxCount = uiMaxCnt;
 
             /* operation mode */
             uiVal = (uiVal & ~((uint32)0xFU << PDM_GetOPModeOperationModeReg(uiChannelId))) |
-                  ((uint32)uiOpModeVal << PDM_GetOPModeOperationModeReg(uiChannelId));
+                    ((uint32)uiOpModeVal << PDM_GetOPModeOperationModeReg(uiChannelId));
 
             /* clk divide */
             uiVal = ((uiVal & ~((uint32)0x3U << PDM_GetOPModeClockDivideReg(uiChannelId))) |
-                  (uiClkDivide << PDM_GetOPModeClockDivideReg(uiChannelId)));
+                     (uiClkDivide << PDM_GetOPModeClockDivideReg(uiChannelId)));
 
             SAL_WriteReg(uiVal, uiOpModeReg);
 
@@ -1136,62 +1085,60 @@ static SALRetCode_t PDM_SetRegisterMode
 *
 ***************************************************************************************************
 */
-static SALRetCode_t PDM_SetPhaseMode1
-(
-    uint32                              uiChannel,
-    uint32                              uiClockDivide,
-    uint32                              uiPositionValue1,
-    uint32                              uiPositionValue2
-)
+static SALRetCode_t PDM_SetPhaseMode1(
+    uint32 uiChannel,
+    uint32 uiClockDivide,
+    uint32 uiPositionValue1,
+    uint32 uiPositionValue2)
 {
-    uint32          uiVal           = 0;
-    uint32          uiModuleId      = 0;
-    uint32          uiChannelId     = 0;
-    uint32          uiOpModeReg     = 0;
-    uint32          uiPstn1Reg      = 0; /* low position */
-    uint32          uiPstn2Reg      = 0; /* high position */
-    SALRetCode_t    ret             = SAL_RET_FAILED;
+    uint32 uiVal = 0;
+    uint32 uiModuleId = 0;
+    uint32 uiChannelId = 0;
+    uint32 uiOpModeReg = 0;
+    uint32 uiPstn1Reg = 0; /* low position */
+    uint32 uiPstn2Reg = 0; /* high position */
+    SALRetCode_t ret = SAL_RET_FAILED;
 
-    if(uiChannel < PDM_OUT_CH_MAX)
+    if (uiChannel < PDM_OUT_CH_MAX)
     {
-        uiModuleId   = PDMHandler[uiChannel].chModuleId;
-        uiChannelId  = PDMHandler[uiChannel].chChannelId;
+        uiModuleId = PDMHandler[uiChannel].chModuleId;
+        uiChannelId = PDMHandler[uiChannel].chChannelId;
 
-        if((uiModuleId < PDM_TOTAL_MODULES) && (uiChannelId < PDM_TOTAL_CH_PER_MODULE))
+        if ((uiModuleId < PDM_TOTAL_MODULES) && (uiChannelId < PDM_TOTAL_CH_PER_MODULE))
         {
             uiOpModeReg = PDM_BASE + PDM_OP_MODE_REG_OFFSET + (uiModuleId * PDM_MODULE_OFFSET);
-            uiPstn1Reg  = PDM_BASE + (uiModuleId * PDM_MODULE_OFFSET) + PDM_GetPSTN1Reg(uiChannelId);
-            uiPstn2Reg  = PDM_BASE + (uiModuleId * PDM_MODULE_OFFSET) + PDM_GetPSTN2Reg(uiChannelId);
-            uiVal         = SAL_ReadReg(uiOpModeReg);
+            uiPstn1Reg = PDM_BASE + (uiModuleId * PDM_MODULE_OFFSET) + PDM_GetPSTN1Reg(uiChannelId);
+            uiPstn2Reg = PDM_BASE + (uiModuleId * PDM_MODULE_OFFSET) + PDM_GetPSTN2Reg(uiChannelId);
+            uiVal = SAL_ReadReg(uiOpModeReg);
 
-            if((((uiVal >> PDM_GetOPModeOperationModeReg(uiChannelId)) & 0xFU) != PDM_OUTPUT_MODE_PHASE_1) &&
-               (PDMHandler[uiChannel].chEnable == PDM_ON))
+            if ((((uiVal >> PDM_GetOPModeOperationModeReg(uiChannelId)) & 0xFU) != PDM_OUTPUT_MODE_PHASE_1) &&
+                (PDMHandler[uiChannel].chEnable == PDM_ON))
             {
                 (void)PDM_Disable(uiChannel, PMM_ON);
                 (void)PDM_WaitForIdleStatus(uiChannel);
             }
 
-            PDMHandler[uiChannel].chModeCfgInfo.mcClockDivide   = uiClockDivide;
+            PDMHandler[uiChannel].chModeCfgInfo.mcClockDivide = uiClockDivide;
             PDMHandler[uiChannel].chModeCfgInfo.mcOperationMode = PDM_OUTPUT_MODE_PHASE_1;
-            PDMHandler[uiChannel].chModeCfgInfo.mcPosition1     = uiPositionValue1;
-            PDMHandler[uiChannel].chModeCfgInfo.mcPosition2     = uiPositionValue2;
+            PDMHandler[uiChannel].chModeCfgInfo.mcPosition1 = uiPositionValue1;
+            PDMHandler[uiChannel].chModeCfgInfo.mcPosition2 = uiPositionValue2;
 
             /* operation mode phase 1 */
             uiVal = (uiVal & ~((uint32)0xFU << PDM_GetOPModeOperationModeReg(uiChannelId))) |
-                  ((uint32)PDM_OUTPUT_MODE_PHASE_1 << PDM_GetOPModeOperationModeReg(uiChannelId));
+                    ((uint32)PDM_OUTPUT_MODE_PHASE_1 << PDM_GetOPModeOperationModeReg(uiChannelId));
 
             SAL_WriteReg(uiVal, uiOpModeReg);
 
             /* divide clock,  default value by 2 */
             uiVal = SAL_ReadReg(uiOpModeReg);
             uiVal = ((uiVal & ~((uint32)0x3U << PDM_GetOPModeClockDivideReg(uiChannelId))) |
-                  (uiClockDivide << PDM_GetOPModeClockDivideReg(uiChannelId)));
+                     (uiClockDivide << PDM_GetOPModeClockDivideReg(uiChannelId)));
 
             SAL_WriteReg(uiVal, uiOpModeReg);
 
             /* pahse mode position register */
-            SAL_WriteReg((uint32) uiPositionValue1, uiPstn1Reg);
-            SAL_WriteReg((uint32) uiPositionValue2, uiPstn2Reg);
+            SAL_WriteReg((uint32)uiPositionValue1, uiPstn1Reg);
+            SAL_WriteReg((uint32)uiPositionValue2, uiPstn2Reg);
 
             ret = SAL_RET_SUCCESS;
         }
@@ -1218,53 +1165,51 @@ static SALRetCode_t PDM_SetPhaseMode1
 *
 ***************************************************************************************************
 */
- static SALRetCode_t PDM_SetPhaseMode2
-(
-    uint32                              uiChannel,
-    uint32                              uiClockDivide,
-    uint32                              uiPositionValue1,
-    uint32                              uiPositionValue2,
-    uint32                              uiPositionValue3,
-    uint32                              uiPositionValue4
-)
+static SALRetCode_t PDM_SetPhaseMode2(
+    uint32 uiChannel,
+    uint32 uiClockDivide,
+    uint32 uiPositionValue1,
+    uint32 uiPositionValue2,
+    uint32 uiPositionValue3,
+    uint32 uiPositionValue4)
 {
-    uint32         uiVal           = 0;
-    uint32         uiModuleId      = 0;
-    uint32         uiChannelId     = 0;
-    uint32         uiOpModeReg     = 0;
-    uint32         uiPstn1Reg      = 0; /* low position */
-    uint32         uiPstn2Reg      = 0; /* high position */
-    uint32         uiPstn3Reg      = 0; /* low position-2*/
-    uint32         uiPstn4Reg      = 0; /* high position-2 */
-    SALRetCode_t   ret             = SAL_RET_FAILED;
+    uint32 uiVal = 0;
+    uint32 uiModuleId = 0;
+    uint32 uiChannelId = 0;
+    uint32 uiOpModeReg = 0;
+    uint32 uiPstn1Reg = 0; /* low position */
+    uint32 uiPstn2Reg = 0; /* high position */
+    uint32 uiPstn3Reg = 0; /* low position-2*/
+    uint32 uiPstn4Reg = 0; /* high position-2 */
+    SALRetCode_t ret = SAL_RET_FAILED;
 
-    if(uiChannel < PDM_OUT_CH_MAX)
+    if (uiChannel < PDM_OUT_CH_MAX)
     {
-        uiModuleId   = PDMHandler[uiChannel].chModuleId;
-        uiChannelId  = PDMHandler[uiChannel].chChannelId;
+        uiModuleId = PDMHandler[uiChannel].chModuleId;
+        uiChannelId = PDMHandler[uiChannel].chChannelId;
 
-        if((uiModuleId < PDM_TOTAL_MODULES) && (uiChannelId < PDM_TOTAL_CH_PER_MODULE))
+        if ((uiModuleId < PDM_TOTAL_MODULES) && (uiChannelId < PDM_TOTAL_CH_PER_MODULE))
         {
             uiOpModeReg = PDM_BASE + PDM_OP_MODE_REG_OFFSET + (uiModuleId * PDM_MODULE_OFFSET);
-            uiPstn1Reg  = PDM_BASE + (uiModuleId * PDM_MODULE_OFFSET) + PDM_GetPSTN1Reg(uiChannelId);
-            uiPstn2Reg  = PDM_BASE + (uiModuleId * PDM_MODULE_OFFSET) + PDM_GetPSTN2Reg(uiChannelId);
-            uiPstn3Reg  = PDM_BASE + (uiModuleId * PDM_MODULE_OFFSET) + PDM_GetPSTN3Reg(uiChannelId);
-            uiPstn4Reg  = PDM_BASE + (uiModuleId * PDM_MODULE_OFFSET) + PDM_GetPSTN4Reg(uiChannelId);
-            uiVal         = SAL_ReadReg(uiOpModeReg);
+            uiPstn1Reg = PDM_BASE + (uiModuleId * PDM_MODULE_OFFSET) + PDM_GetPSTN1Reg(uiChannelId);
+            uiPstn2Reg = PDM_BASE + (uiModuleId * PDM_MODULE_OFFSET) + PDM_GetPSTN2Reg(uiChannelId);
+            uiPstn3Reg = PDM_BASE + (uiModuleId * PDM_MODULE_OFFSET) + PDM_GetPSTN3Reg(uiChannelId);
+            uiPstn4Reg = PDM_BASE + (uiModuleId * PDM_MODULE_OFFSET) + PDM_GetPSTN4Reg(uiChannelId);
+            uiVal = SAL_ReadReg(uiOpModeReg);
 
-            if((((uiVal >> PDM_GetOPModeOperationModeReg(uiChannelId)) & 0xFU) != PDM_OUTPUT_MODE_PHASE_2) &&
-            (PDMHandler[uiChannel].chEnable == PDM_ON))
+            if ((((uiVal >> PDM_GetOPModeOperationModeReg(uiChannelId)) & 0xFU) != PDM_OUTPUT_MODE_PHASE_2) &&
+                (PDMHandler[uiChannel].chEnable == PDM_ON))
             {
                 (void)PDM_Disable(uiChannel, PMM_ON);
                 (void)PDM_WaitForIdleStatus(uiChannel);
             }
 
-            PDMHandler[uiChannel].chModeCfgInfo.mcClockDivide      = uiClockDivide;
-            PDMHandler[uiChannel].chModeCfgInfo.mcOperationMode    = PDM_OUTPUT_MODE_PHASE_2;
-            PDMHandler[uiChannel].chModeCfgInfo.mcPosition1        = uiPositionValue1;
-            PDMHandler[uiChannel].chModeCfgInfo.mcPosition2        = uiPositionValue2;
-            PDMHandler[uiChannel].chModeCfgInfo.mcPosition3        = uiPositionValue3;
-            PDMHandler[uiChannel].chModeCfgInfo.mcPosition4        = uiPositionValue4;
+            PDMHandler[uiChannel].chModeCfgInfo.mcClockDivide = uiClockDivide;
+            PDMHandler[uiChannel].chModeCfgInfo.mcOperationMode = PDM_OUTPUT_MODE_PHASE_2;
+            PDMHandler[uiChannel].chModeCfgInfo.mcPosition1 = uiPositionValue1;
+            PDMHandler[uiChannel].chModeCfgInfo.mcPosition2 = uiPositionValue2;
+            PDMHandler[uiChannel].chModeCfgInfo.mcPosition3 = uiPositionValue3;
+            PDMHandler[uiChannel].chModeCfgInfo.mcPosition4 = uiPositionValue4;
 
             /* operation mode phase 2 */
             uiVal = (uiVal & ~((uint32)0xFU << PDM_GetOPModeOperationModeReg(uiChannelId))) |
@@ -1274,14 +1219,14 @@ static SALRetCode_t PDM_SetPhaseMode1
             /* divide by 2 : default value */
             uiVal = SAL_ReadReg(uiOpModeReg);
             uiVal = ((uiVal & ~((uint32)0x3U << PDM_GetOPModeClockDivideReg(uiChannelId))) |
-               (uiClockDivide << PDM_GetOPModeClockDivideReg(uiChannelId)));
+                     (uiClockDivide << PDM_GetOPModeClockDivideReg(uiChannelId)));
             SAL_WriteReg(uiVal, uiOpModeReg);
 
             /* pahse mode position register */
-            SAL_WriteReg((uint32) uiPositionValue1, uiPstn1Reg);
-            SAL_WriteReg((uint32) uiPositionValue2, uiPstn2Reg);
-            SAL_WriteReg((uint32) uiPositionValue3, uiPstn3Reg);
-            SAL_WriteReg((uint32) uiPositionValue4, uiPstn4Reg);
+            SAL_WriteReg((uint32)uiPositionValue1, uiPstn1Reg);
+            SAL_WriteReg((uint32)uiPositionValue2, uiPstn2Reg);
+            SAL_WriteReg((uint32)uiPositionValue3, uiPstn3Reg);
+            SAL_WriteReg((uint32)uiPositionValue4, uiPstn4Reg);
 
             ret = SAL_RET_SUCCESS;
         }
@@ -1303,37 +1248,35 @@ static SALRetCode_t PDM_SetPhaseMode1
 *
 ***************************************************************************************************
 */
-static SALRetCode_t PDM_ConfigPhase1Pstn
-(
-    uint32                              uiChannel,
-    uint32                              uiClockFreq,
-    uint32                              uiDutyNanoSec1,
-    uint32                              uiPeriodNanoSec1
-)
+static SALRetCode_t PDM_ConfigPhase1Pstn(
+    uint32 uiChannel,
+    uint32 uiClockFreq,
+    uint32 uiDutyNanoSec1,
+    uint32 uiPeriodNanoSec1)
 {
-    uint32          uiClockDivide       = 0;
-    uint32          uiClockTns          = 0;
-    uint32          uiPeriodTotalns     = 0;
-    uint32          uiPeriodTotalnum    = 0;
-    uint32          uiPosition1         = 0;
-    uint32          uiPosition2         = 0;
-    SALRetCode_t    ret                 = SAL_RET_SUCCESS;
+    uint32 uiClockDivide = 0;
+    uint32 uiClockTns = 0;
+    uint32 uiPeriodTotalns = 0;
+    uint32 uiPeriodTotalnum = 0;
+    uint32 uiPosition1 = 0;
+    uint32 uiPosition2 = 0;
+    SALRetCode_t ret = SAL_RET_SUCCESS;
 
-    if(uiClockFreq == 0UL)
+    if (uiClockFreq == 0UL)
     {
-       PDM_Err("Invalid clock frequency. Check the congiguration \n");
-       ret = SAL_RET_FAILED;
+        PDM_Err("Invalid clock frequency. Check the congiguration \n");
+        ret = SAL_RET_FAILED;
     }
-    else if((uiPeriodNanoSec1 == 0UL) || (uiDutyNanoSec1 > uiPeriodNanoSec1))
+    else if ((uiPeriodNanoSec1 == 0UL) || (uiDutyNanoSec1 > uiPeriodNanoSec1))
     {
-       PDM_Err("Invalid duty and period. Check the congiguration \n");
-       ret = SAL_RET_FAILED;
+        PDM_Err("Invalid duty and period. Check the congiguration \n");
+        ret = SAL_RET_FAILED;
     }
     else
     {
-        for(uiClockDivide = 0UL; uiClockDivide <= PDM_DIVID_MAX; uiClockDivide++)
+        for (uiClockDivide = 0UL; uiClockDivide <= PDM_DIVID_MAX; uiClockDivide++)
         {
-            if((PDM_ONE_SECOND_TO_NANO % (uiClockFreq >> (uiClockDivide + 1UL))) == 0UL)
+            if ((PDM_ONE_SECOND_TO_NANO % (uiClockFreq >> (uiClockDivide + 1UL))) == 0UL)
             {
                 break;
             }
@@ -1345,7 +1288,7 @@ static SALRetCode_t PDM_ConfigPhase1Pstn
 
         uiPeriodTotalns = uiPeriodNanoSec1;
 
-        for( ; uiClockDivide <= PDM_DIVID_MAX; uiClockDivide++)
+        for (; uiClockDivide <= PDM_DIVID_MAX; uiClockDivide++)
         {
             uiPeriodTotalnum = (uiPeriodTotalns / uiClockTns);
 
@@ -1355,20 +1298,20 @@ static SALRetCode_t PDM_ConfigPhase1Pstn
                 break;
             }
 
-            if((PDM_REG_MAX_VALUE >> 1UL) > uiClockTns)
+            if ((PDM_REG_MAX_VALUE >> 1UL) > uiClockTns)
             {
                 uiClockTns = (uiClockTns << 1UL);
                 uiClockFreq = (uiClockFreq >> 1UL);
             }
         }
 
-        if((PDM_ONE_SECOND_TO_NANO % uiClockFreq) != 0UL)
+        if ((PDM_ONE_SECOND_TO_NANO % uiClockFreq) != 0UL)
         {
             PDM_D("There is difference in calculation. It may affect the output pulse\n");
         }
 
-        uiPosition1 = ((uiPeriodNanoSec1 - uiDutyNanoSec1) / uiClockTns);   // LOW
-        uiPosition2 = (uiDutyNanoSec1 / uiClockTns);                        // HIGH
+        uiPosition1 = ((uiPeriodNanoSec1 - uiDutyNanoSec1) / uiClockTns); // LOW
+        uiPosition2 = (uiDutyNanoSec1 / uiClockTns);                      // HIGH
 
         uiPosition1 = (uiPosition1 > PDM_HW_LIMIT_VALUE_2) ? (uiPosition1 - PDM_HW_LIMIT_VALUE_2) : 0UL;
         uiPosition2 = (uiPosition2 > PDM_HW_LIMIT_VALUE_2) ? (uiPosition2 - PDM_HW_LIMIT_VALUE_2) : 0UL;
@@ -1398,43 +1341,41 @@ static SALRetCode_t PDM_ConfigPhase1Pstn
 *
 ***************************************************************************************************
 */
-static SALRetCode_t PDM_ConfigPhase2Pstn
-(
-    uint32                              uiChannel,
-    uint32                              uiClockFreq,
-    uint32                              uiDutyNanoSec1,
-    uint32                              uiPeriodNanoSec1,
-    uint32                              uiDutyNanoSec2,
-    uint32                              uiPeriodNanoSec2
-)
+static SALRetCode_t PDM_ConfigPhase2Pstn(
+    uint32 uiChannel,
+    uint32 uiClockFreq,
+    uint32 uiDutyNanoSec1,
+    uint32 uiPeriodNanoSec1,
+    uint32 uiDutyNanoSec2,
+    uint32 uiPeriodNanoSec2)
 {
-    uint32          uiClockDivide       = 0;
-    uint32          uiClockTns          = 0;
-    uint32          uiPeriodTotalns     = 0;
-    uint32          uiPeriodTotalnum    = 0;
-    uint32          uiPosition1         = 0;
-    uint32          uiPosition2         = 0;
-    uint32          uiPosition3         = 0;
-    uint32          uiPosition4         = 0;
-    SALRetCode_t    ret                 = SAL_RET_SUCCESS;
+    uint32 uiClockDivide = 0;
+    uint32 uiClockTns = 0;
+    uint32 uiPeriodTotalns = 0;
+    uint32 uiPeriodTotalnum = 0;
+    uint32 uiPosition1 = 0;
+    uint32 uiPosition2 = 0;
+    uint32 uiPosition3 = 0;
+    uint32 uiPosition4 = 0;
+    SALRetCode_t ret = SAL_RET_SUCCESS;
 
-    if(uiClockFreq == 0UL)
+    if (uiClockFreq == 0UL)
     {
-       PDM_Err("Invalid clock frequency. Check the congiguration \n");
-       ret = SAL_RET_FAILED;
+        PDM_Err("Invalid clock frequency. Check the congiguration \n");
+        ret = SAL_RET_FAILED;
     }
-    else if((uiPeriodNanoSec1 == 0UL) || (uiDutyNanoSec1 > uiPeriodNanoSec1) || (uiDutyNanoSec2 > uiPeriodNanoSec2))
+    else if ((uiPeriodNanoSec1 == 0UL) || (uiDutyNanoSec1 > uiPeriodNanoSec1) || (uiDutyNanoSec2 > uiPeriodNanoSec2))
     {
-       PDM_Err("Invalid duty and period (uiDutyNanoSec1 > uiPeriodNanoSec1) or (uiDutyNanoSec2 > uiPeriodNanoSec2)\n");
-       ret = SAL_RET_FAILED;
+        PDM_Err("Invalid duty and period (uiDutyNanoSec1 > uiPeriodNanoSec1) or (uiDutyNanoSec2 > uiPeriodNanoSec2)\n");
+        ret = SAL_RET_FAILED;
     }
     else
     {
-        for(uiClockDivide = 0UL; uiClockDivide <= PDM_DIVID_MAX; uiClockDivide++)
+        for (uiClockDivide = 0UL; uiClockDivide <= PDM_DIVID_MAX; uiClockDivide++)
         {
-            if((PDM_ONE_SECOND_TO_NANO % (uiClockFreq >> (uiClockDivide + 1UL))) == 0UL)
+            if ((PDM_ONE_SECOND_TO_NANO % (uiClockFreq >> (uiClockDivide + 1UL))) == 0UL)
             {
-               break;
+                break;
             }
         }
 
@@ -1444,7 +1385,7 @@ static SALRetCode_t PDM_ConfigPhase2Pstn
 
         uiPeriodTotalns = uiPeriodNanoSec1 + uiPeriodNanoSec2;
 
-        for( ; uiClockDivide <= PDM_DIVID_MAX; uiClockDivide++)
+        for (; uiClockDivide <= PDM_DIVID_MAX; uiClockDivide++)
         {
             uiPeriodTotalnum = (uiPeriodTotalns / uiClockTns);
 
@@ -1454,23 +1395,23 @@ static SALRetCode_t PDM_ConfigPhase2Pstn
                 break;
             }
 
-            if((PDM_REG_MAX_VALUE >> 1UL) > uiClockTns)
+            if ((PDM_REG_MAX_VALUE >> 1UL) > uiClockTns)
             {
                 uiClockTns = (uiClockTns << 1UL);
                 uiClockFreq = (uiClockFreq >> 1UL);
             }
         }
 
-        if((PDM_ONE_SECOND_TO_NANO % uiClockFreq) != 0UL)
+        if ((PDM_ONE_SECOND_TO_NANO % uiClockFreq) != 0UL)
         {
             PDM_D("There is difference in calculation. It may affect the output pulse\n");
         }
 
-        uiPosition1 = ((uiPeriodNanoSec1 - uiDutyNanoSec1) / uiClockTns);   // LOW1
-        uiPosition2 = (uiDutyNanoSec1 / uiClockTns);                        // HIGH1
+        uiPosition1 = ((uiPeriodNanoSec1 - uiDutyNanoSec1) / uiClockTns); // LOW1
+        uiPosition2 = (uiDutyNanoSec1 / uiClockTns);                      // HIGH1
 
-        uiPosition3 = ((uiPeriodNanoSec2 - uiDutyNanoSec2) / uiClockTns);   // LOW2
-        uiPosition4 = (uiDutyNanoSec2 / uiClockTns);                        // HIGH2
+        uiPosition3 = ((uiPeriodNanoSec2 - uiDutyNanoSec2) / uiClockTns); // LOW2
+        uiPosition4 = (uiDutyNanoSec2 / uiClockTns);                      // HIGH2
 
         uiPosition1 = (uiPosition1 > PDM_HW_LIMIT_VALUE_2) ? (uiPosition1 - PDM_HW_LIMIT_VALUE_2) : 0UL;
         uiPosition2 = (uiPosition2 > PDM_HW_LIMIT_VALUE_2) ? (uiPosition2 - PDM_HW_LIMIT_VALUE_2) : 0UL;
@@ -1497,38 +1438,36 @@ static SALRetCode_t PDM_ConfigPhase2Pstn
 *
 ***************************************************************************************************
 */
-static SALRetCode_t PDM_ConfigPhaseIdle
-(
-    uint32                              uiChannel,
-    const PDMModeConfig_t *             pModeConfig
-)
+static SALRetCode_t PDM_ConfigPhaseIdle(
+    uint32 uiChannel,
+    const PDMModeConfig_t *pModeConfig)
 {
-    SALRetCode_t   ret             = SAL_RET_FAILED;
+    SALRetCode_t ret = SAL_RET_FAILED;
 
-    if(uiChannel < PDM_OUT_CH_MAX)
+    if (uiChannel < PDM_OUT_CH_MAX)
     {
         PDM_D("Transit to IDLE State \n");
 
         ret = PDM_SetOutputInIdleState(uiChannel, pModeConfig->mcOutSignalInIdle);
 
-        if(ret == SAL_RET_SUCCESS)
+        if (ret == SAL_RET_SUCCESS)
         {
-            switch(pModeConfig->mcOperationMode)
+            switch (pModeConfig->mcOperationMode)
             {
-                case PDM_OUTPUT_MODE_PHASE_1 :
-                    PDMHandler[uiChannel].chIdleState = PDM_ON;
-                    ret = PDM_SetPhaseMode1(uiChannel, 0UL, PDM_OUTPUT_PATTERN_LOW, PDM_OUTPUT_PATTERN_HIGH);
-                    break;
+            case PDM_OUTPUT_MODE_PHASE_1:
+                PDMHandler[uiChannel].chIdleState = PDM_ON;
+                ret = PDM_SetPhaseMode1(uiChannel, 0UL, PDM_OUTPUT_PATTERN_LOW, PDM_OUTPUT_PATTERN_HIGH);
+                break;
 
-                case PDM_OUTPUT_MODE_PHASE_2 :
-                    PDMHandler[uiChannel].chIdleState = PDM_ON;
-                    ret = PDM_SetPhaseMode2(uiChannel, 0UL,
-                                            PDM_OUTPUT_PATTERN_LOW, PDM_OUTPUT_PATTERN_HIGH,
-                                            PDM_OUTPUT_PATTERN_LOW, PDM_OUTPUT_PATTERN_HIGH);
-                    break;
-                default :
-                    PDM_Err("Invalid Operation mode\n");
-                    break;
+            case PDM_OUTPUT_MODE_PHASE_2:
+                PDMHandler[uiChannel].chIdleState = PDM_ON;
+                ret = PDM_SetPhaseMode2(uiChannel, 0UL,
+                                        PDM_OUTPUT_PATTERN_LOW, PDM_OUTPUT_PATTERN_HIGH,
+                                        PDM_OUTPUT_PATTERN_LOW, PDM_OUTPUT_PATTERN_HIGH);
+                break;
+            default:
+                PDM_Err("Invalid Operation mode\n");
+                break;
             }
         }
     }
@@ -1551,16 +1490,14 @@ static SALRetCode_t PDM_ConfigPhaseIdle
 *
 ***************************************************************************************************
 */
-static SALRetCode_t PDM_ConfigPhaseMode
-(
-    uint32                              uiChannel,
-    const PDMModeConfig_t *             pModeConfig
-)
+static SALRetCode_t PDM_ConfigPhaseMode(
+    uint32 uiChannel,
+    const PDMModeConfig_t *pModeConfig)
 {
-    uint32          uiClkFreq       = 0;
-    SALRetCode_t    ret             = SAL_RET_SUCCESS;
+    uint32 uiClkFreq = 0;
+    SALRetCode_t ret = SAL_RET_SUCCESS;
 
-    if(pModeConfig == (PDMModeConfig_t*)NULL)
+    if (pModeConfig == (PDMModeConfig_t *)NULL)
     {
         PDM_Err("Invalid configuration pointer \n");
         ret = SAL_RET_FAILED;
@@ -1568,37 +1505,37 @@ static SALRetCode_t PDM_ConfigPhaseMode
     else
     {
         uiClkFreq = CLOCK_GetPeriRate((sint32)CLOCK_PERI_PWM0);
-        switch(pModeConfig->mcOperationMode)
+        switch (pModeConfig->mcOperationMode)
         {
-            case PDM_OUTPUT_MODE_PHASE_1 :
-                if(((pModeConfig->mcPosition1 == PDM_OUTPUT_PATTERN_LOW) && (pModeConfig->mcPosition2 == PDM_OUTPUT_PATTERN_HIGH)) ||
-                   ((pModeConfig->mcPosition1 == PDM_OUTPUT_PATTERN_HIGH) && (pModeConfig->mcPosition2 == PDM_OUTPUT_PATTERN_LOW)))
-                {
-                    ret = PDM_ConfigPhaseIdle(uiChannel, pModeConfig);
-                }
-                else
-                {
-                    PDMHandler[uiChannel].chIdleState = PDM_OFF;
-                    ret = PDM_ConfigPhase1Pstn(uiChannel, uiClkFreq, pModeConfig->mcDutyNanoSec1, pModeConfig->mcPeriodNanoSec1);
-                }
-                break;
+        case PDM_OUTPUT_MODE_PHASE_1:
+            if (((pModeConfig->mcPosition1 == PDM_OUTPUT_PATTERN_LOW) && (pModeConfig->mcPosition2 == PDM_OUTPUT_PATTERN_HIGH)) ||
+                ((pModeConfig->mcPosition1 == PDM_OUTPUT_PATTERN_HIGH) && (pModeConfig->mcPosition2 == PDM_OUTPUT_PATTERN_LOW)))
+            {
+                ret = PDM_ConfigPhaseIdle(uiChannel, pModeConfig);
+            }
+            else
+            {
+                PDMHandler[uiChannel].chIdleState = PDM_OFF;
+                ret = PDM_ConfigPhase1Pstn(uiChannel, uiClkFreq, pModeConfig->mcDutyNanoSec1, pModeConfig->mcPeriodNanoSec1);
+            }
+            break;
 
-            default :
-                if(((pModeConfig->mcPosition1 == PDM_OUTPUT_PATTERN_LOW) && (pModeConfig->mcPosition2 == PDM_OUTPUT_PATTERN_HIGH) &&
-                   (pModeConfig->mcPosition3 == PDM_OUTPUT_PATTERN_LOW) && (pModeConfig->mcPosition4 == PDM_OUTPUT_PATTERN_HIGH)) ||
-                   ((pModeConfig->mcPosition1 == PDM_OUTPUT_PATTERN_HIGH) && (pModeConfig->mcPosition2 == PDM_OUTPUT_PATTERN_LOW) &&
-                   (pModeConfig->mcPosition3 == PDM_OUTPUT_PATTERN_HIGH) && (pModeConfig->mcPosition4 == PDM_OUTPUT_PATTERN_LOW)))
-                {
-                    ret = PDM_ConfigPhaseIdle(uiChannel, pModeConfig);
-                }
-                else
-                {
-                    PDMHandler[uiChannel].chIdleState = PDM_OFF;
-                    ret = PDM_ConfigPhase2Pstn(uiChannel, uiClkFreq,
-                                            pModeConfig->mcDutyNanoSec1, pModeConfig->mcPeriodNanoSec1,
-                                            pModeConfig->mcDutyNanoSec2, pModeConfig->mcPeriodNanoSec2);
-                }
-                break;
+        default:
+            if (((pModeConfig->mcPosition1 == PDM_OUTPUT_PATTERN_LOW) && (pModeConfig->mcPosition2 == PDM_OUTPUT_PATTERN_HIGH) &&
+                 (pModeConfig->mcPosition3 == PDM_OUTPUT_PATTERN_LOW) && (pModeConfig->mcPosition4 == PDM_OUTPUT_PATTERN_HIGH)) ||
+                ((pModeConfig->mcPosition1 == PDM_OUTPUT_PATTERN_HIGH) && (pModeConfig->mcPosition2 == PDM_OUTPUT_PATTERN_LOW) &&
+                 (pModeConfig->mcPosition3 == PDM_OUTPUT_PATTERN_HIGH) && (pModeConfig->mcPosition4 == PDM_OUTPUT_PATTERN_LOW)))
+            {
+                ret = PDM_ConfigPhaseIdle(uiChannel, pModeConfig);
+            }
+            else
+            {
+                PDMHandler[uiChannel].chIdleState = PDM_OFF;
+                ret = PDM_ConfigPhase2Pstn(uiChannel, uiClkFreq,
+                                           pModeConfig->mcDutyNanoSec1, pModeConfig->mcPeriodNanoSec1,
+                                           pModeConfig->mcDutyNanoSec2, pModeConfig->mcPeriodNanoSec2);
+            }
+            break;
         }
     }
 
@@ -1619,32 +1556,30 @@ static SALRetCode_t PDM_ConfigPhaseMode
 *
 ***************************************************************************************************
 */
-static SALRetCode_t PDM_ConfigPort
-(
-    uint32                              uiChannel,
-    uint32                              uiPortNum
-)
+static SALRetCode_t PDM_ConfigPort(
+    uint32 uiChannel,
+    uint32 uiPortNum)
 {
-    uint32          uiIdx           = 0;
-    SALRetCode_t    ret             = SAL_RET_FAILED;
+    uint32 uiIdx = 0;
+    SALRetCode_t ret = SAL_RET_FAILED;
 
-    if(uiChannel < PDM_OUT_CH_MAX)
+    if (uiChannel < PDM_OUT_CH_MAX)
     {
         for (uiIdx = 0; uiIdx < PDM_OUT_PORT_MAX; uiIdx++)
         {
             if (uiPortNum == sPdmPort[uiIdx].pcPortSelCh)
             {
-                if((uiIdx + uiChannel) < PDM_OUT_PORT_MAX)
+                if ((uiIdx + uiChannel) < PDM_OUT_PORT_MAX)
                 {
-                    if(sPdmPort[uiIdx].pcPortSelCh == (uint32)GPIO_PERICH_CH3)
+                    if (sPdmPort[uiIdx].pcPortSelCh == (uint32)GPIO_PERICH_CH3)
                     {
                         /* If the port is GPIO_K, have to set PMGPIO_FS register */
                         PMIO_SetGpk(PMIO_GPK((uiChannel + 8UL)));
                     }
 
-                    ( void ) GPIO_Config(sPdmPort[uiIdx + uiChannel].pcPortNum, (sPdmPort[uiIdx + uiChannel].pcPortFs | GPIO_OUTPUT | GPIO_DS(0x3UL)));
+                    (void)GPIO_Config(sPdmPort[uiIdx + uiChannel].pcPortNum, (sPdmPort[uiIdx + uiChannel].pcPortFs | GPIO_OUTPUT | GPIO_DS(0x3UL)));
 
-                    ( void ) GPIO_PerichSel(sPdmPort[uiIdx + uiChannel].pcPdmCh, sPdmPort[uiIdx + uiChannel].pcPortSelCh);
+                    (void)GPIO_PerichSel(sPdmPort[uiIdx + uiChannel].pcPdmCh, sPdmPort[uiIdx + uiChannel].pcPortSelCh);
 
                     PDMHandler[uiChannel].chModeCfgInfo.mcPortNumber = uiPortNum;
 
@@ -1673,40 +1608,38 @@ static SALRetCode_t PDM_ConfigPort
 *
 ***************************************************************************************************
 */
-static SALRetCode_t PDM_ConfigOutput
-(
-    uint32                              uiChannel,
-    PDMModeConfig_t *                   pModeConfig
-)
+static SALRetCode_t PDM_ConfigOutput(
+    uint32 uiChannel,
+    PDMModeConfig_t *pModeConfig)
 {
-    uint32          ret             = 0UL;
+    uint32 ret = 0UL;
 
     /* Check vaildation of Configuration value */
-    if(1UL < pModeConfig->mcInversedSignal)
+    if (1UL < pModeConfig->mcInversedSignal)
     {
         PDM_D("WARNING! Inavild InversedSignal value. Set InversedSignal to '0'\n");
         pModeConfig->mcInversedSignal = 0UL;
     }
 
-    if(0x0FUL < pModeConfig->mcLoopCount)
+    if (0x0FUL < pModeConfig->mcLoopCount)
     {
         PDM_D("WARNING! Inavild LoopCount value. Set LoopCount to '0'\n");
         pModeConfig->mcLoopCount = 0UL;
     }
 
-    if(1UL < pModeConfig->mcOutSignalInIdle)
+    if (1UL < pModeConfig->mcOutSignalInIdle)
     {
         PDM_D("WARNING! Inavild OutSignalInIdle value. Set OutSignalInIdle to '0'\n");
         pModeConfig->mcOutSignalInIdle = 0UL;
     }
 
-    if(0x0FUL < pModeConfig->mcOutputCtrl)
+    if (0x0FUL < pModeConfig->mcOutputCtrl)
     {
         PDM_D("WARNING! Inavild OutputCtrl value. Set OutputCtrl to '0'\n");
         pModeConfig->mcOutputCtrl = 0UL;
     }
 
-    if((pModeConfig->mcOutputCtrl & 0x01UL) != ((pModeConfig->mcOutputCtrl & 0x04UL) >> 2UL))
+    if ((pModeConfig->mcOutputCtrl & 0x01UL) != ((pModeConfig->mcOutputCtrl & 0x04UL) >> 2UL))
     {
         PDM_D("WARNING! Inavild OutputCtrl value. DO_Sel and OEN_Sel should be same. Set OutputCtrl to '0'\n");
         pModeConfig->mcOutputCtrl = 0UL;
@@ -1720,7 +1653,6 @@ static SALRetCode_t PDM_ConfigOutput
 
     return (SALRetCode_t)ret;
 }
-
 
 /*
 ***************************************************************************************************
@@ -1741,12 +1673,10 @@ static SALRetCode_t PDM_ConfigOutput
 *
 ***************************************************************************************************
 */
-void PDM_CfgSetWrPw
-(
-    void
-)
+void PDM_CfgSetWrPw(
+    void)
 {
-    uint32          uiReg           = 0;
+    uint32 uiReg = 0;
 
     uiReg = PDM_CFG_BASE + PDM_PCFG_WR_PW_REG_OFFSET;
 
@@ -1766,12 +1696,10 @@ void PDM_CfgSetWrPw
 *
 ***************************************************************************************************
 */
-void PDM_CfgSetWrLock
-(
-    uint32                              uiLock
-)
+void PDM_CfgSetWrLock(
+    uint32 uiLock)
 {
-    uint32          uiReg           = 0;
+    uint32 uiReg = 0;
 
     uiReg = PDM_CFG_BASE + PDM_PCFG_WR_LOCK_REG_OFFSET;
 
@@ -1787,10 +1715,8 @@ void PDM_CfgSetWrLock
 *
 ***************************************************************************************************
 */
-void PDM_EnableClock
-(
-    void
-)
+void PDM_EnableClock(
+    void)
 {
     (void)CLOCK_SetPeriRate((sint32)CLOCK_PERI_PWM0, PDM_PERI_CLOCK);
     (void)CLOCK_EnablePeri((sint32)CLOCK_PERI_PWM0);
@@ -1815,10 +1741,8 @@ void PDM_EnableClock
 *
 ***************************************************************************************************
 */
-void PDM_DisableClock
-(
-    void
-)
+void PDM_DisableClock(
+    void)
 {
     (void)CLOCK_DisablePeri((sint32)CLOCK_PERI_PWM0);
     (void)CLOCK_DisablePeri((sint32)CLOCK_PERI_PWM1);
@@ -1835,57 +1759,54 @@ void PDM_DisableClock
 *
 ***************************************************************************************************
 */
-void PDM_Init
-(
-    void
-)
+void PDM_Init(void)
 {
-    uint32          uiChannel       = 0;
+    uint32 uiChannel = 0;
 
-    for(uiChannel = 0UL ; uiChannel < PDM_OUT_CH_MAX ; uiChannel++)
+    for (uiChannel = 0UL; uiChannel < PDM_OUT_CH_MAX; uiChannel++)
     {
         /* Initialize pdm handle */
-        PDMHandler[uiChannel].chModuleId                     = uiChannel / PDM_TOTAL_CH_PER_MODULE;
-        PDMHandler[uiChannel].chChannelId                    = uiChannel % PDM_TOTAL_CH_PER_MODULE;
-        PDMHandler[uiChannel].chEnable                       = PDM_OFF;
-        PDMHandler[uiChannel].chIdleState                    = PDM_OFF;
-        PDMHandler[uiChannel].chOutSignalInIdle              = PDM_OFF;
-        PDMHandler[uiChannel].chIdleState                    = PDM_OFF;
+        PDMHandler[uiChannel].chModuleId = uiChannel / PDM_TOTAL_CH_PER_MODULE;
+        PDMHandler[uiChannel].chChannelId = uiChannel % PDM_TOTAL_CH_PER_MODULE;
+        PDMHandler[uiChannel].chEnable = PDM_OFF;
+        PDMHandler[uiChannel].chIdleState = PDM_OFF;
+        PDMHandler[uiChannel].chOutSignalInIdle = PDM_OFF;
+        PDMHandler[uiChannel].chIdleState = PDM_OFF;
 
-        PDMHandler[uiChannel].chModeCfgInfo.mcPortNumber     = PDM_OFF;
-        PDMHandler[uiChannel].chModeCfgInfo.mcOperationMode  = PDM_OFF;
-        PDMHandler[uiChannel].chModeCfgInfo.mcClockDivide    = PDM_OFF;
-        PDMHandler[uiChannel].chModeCfgInfo.mcLoopCount      = PDM_OFF;
+        PDMHandler[uiChannel].chModeCfgInfo.mcPortNumber = PDM_OFF;
+        PDMHandler[uiChannel].chModeCfgInfo.mcOperationMode = PDM_OFF;
+        PDMHandler[uiChannel].chModeCfgInfo.mcClockDivide = PDM_OFF;
+        PDMHandler[uiChannel].chModeCfgInfo.mcLoopCount = PDM_OFF;
         PDMHandler[uiChannel].chModeCfgInfo.mcInversedSignal = PDM_OFF;
         PDMHandler[uiChannel].chModeCfgInfo.mcPeriodNanoSec1 = PDM_OFF;
-        PDMHandler[uiChannel].chModeCfgInfo.mcDutyNanoSec1   = PDM_OFF;
+        PDMHandler[uiChannel].chModeCfgInfo.mcDutyNanoSec1 = PDM_OFF;
         PDMHandler[uiChannel].chModeCfgInfo.mcPeriodNanoSec2 = PDM_OFF;
-        PDMHandler[uiChannel].chModeCfgInfo.mcDutyNanoSec2   = PDM_OFF;
-        PDMHandler[uiChannel].chModeCfgInfo.mcPosition1      = 0UL;
-        PDMHandler[uiChannel].chModeCfgInfo.mcPosition2      = 0UL;
-        PDMHandler[uiChannel].chModeCfgInfo.mcPosition3      = 0UL;
-        PDMHandler[uiChannel].chModeCfgInfo.mcPosition4      = 0UL;
+        PDMHandler[uiChannel].chModeCfgInfo.mcDutyNanoSec2 = PDM_OFF;
+        PDMHandler[uiChannel].chModeCfgInfo.mcPosition1 = 0UL;
+        PDMHandler[uiChannel].chModeCfgInfo.mcPosition2 = 0UL;
+        PDMHandler[uiChannel].chModeCfgInfo.mcPosition3 = 0UL;
+        PDMHandler[uiChannel].chModeCfgInfo.mcPosition4 = 0UL;
 
-        PDMHandler[uiChannel].chModeCfgInfo.mcOutPattern1    = 0UL;
-        PDMHandler[uiChannel].chModeCfgInfo.mcOutPattern2    = 0UL;
-        PDMHandler[uiChannel].chModeCfgInfo.mcOutPattern3    = 0UL;
-        PDMHandler[uiChannel].chModeCfgInfo.mcOutPattern4    = 0UL;
-        PDMHandler[uiChannel].chModeCfgInfo.mcMaxCount       = 0UL;
+        PDMHandler[uiChannel].chModeCfgInfo.mcOutPattern1 = 0UL;
+        PDMHandler[uiChannel].chModeCfgInfo.mcOutPattern2 = 0UL;
+        PDMHandler[uiChannel].chModeCfgInfo.mcOutPattern3 = 0UL;
+        PDMHandler[uiChannel].chModeCfgInfo.mcOutPattern4 = 0UL;
+        PDMHandler[uiChannel].chModeCfgInfo.mcMaxCount = 0UL;
 
 #ifdef PDM_SAFETY_FEATURE_ENABLED
-        PDMHandler[uiChannel].chPMMEnable                    = PMM_ON;
-        PDMHandler[uiChannel].chPMMInputCnect                = PMM_OFF;
-        PDMHandler[uiChannel].chPMMFaultStatus               = 0UL;
-        PDMHandler[uiChannel].chPMMTimeoutValue              = 0xFFFFFFFFUL;
-        PDMHandler[uiChannel].chPMMDutyMargin                = 0xFFUL;
-        PDMHandler[uiChannel].chPMMErrChannel                = FALSE;
+        PDMHandler[uiChannel].chPMMEnable = PMM_ON;
+        PDMHandler[uiChannel].chPMMInputCnect = PMM_OFF;
+        PDMHandler[uiChannel].chPMMFaultStatus = 0UL;
+        PDMHandler[uiChannel].chPMMTimeoutValue = 0xFFFFFFFFUL;
+        PDMHandler[uiChannel].chPMMDutyMargin = 0xFFUL;
+        PDMHandler[uiChannel].chPMMErrChannel = FALSE;
 #endif
     }
 
     PDM_EnableClock();
 
 #ifdef PDM_SAFETY_FEATURE_ENABLED
-    if(g_safety_enabled == FALSE)
+    if (g_safety_enabled == FALSE)
     {
         (void)FMU_IsrHandler(FMU_ID_PDM0, FMU_SVL_HIGH, (FMUIntFnctPtr)&PMM_PDM0IrqHandler, NULL_PTR);
         (void)FMU_IsrHandler(FMU_ID_PDM1, FMU_SVL_HIGH, (FMUIntFnctPtr)&PMM_PDM1IrqHandler, NULL_PTR);
@@ -1912,18 +1833,15 @@ void PDM_Init
 *
 ***************************************************************************************************
 */
-void PDM_Deinit
-(
-    void
-)
+void PDM_Deinit(
+    void)
 {
     PDM_DisableClock();
-    (void)SAL_MemSet(PDMHandler, 0, sizeof(PDMHandler)*PDM_TOTAL_CHANNELS);
+    (void)SAL_MemSet(PDMHandler, 0, sizeof(PDMHandler) * PDM_TOTAL_CHANNELS);
 
 #ifdef PDM_SAFETY_FEATURE_ENABLED
-    (void)SAL_MemSet(PDMIsrData, 0, sizeof(PDMIsrData)*PDM_TOTAL_CHANNELS);
+    (void)SAL_MemSet(PDMIsrData, 0, sizeof(PDMIsrData) * PDM_TOTAL_CHANNELS);
 #endif
-
 }
 
 /*
@@ -1943,37 +1861,35 @@ void PDM_Deinit
 *
 ***************************************************************************************************
 */
-SALRetCode_t PDM_Enable
-(
-    uint32                              uiChannel,
-    uint32                              uiMonitoring
-)
+SALRetCode_t PDM_Enable(
+    uint32 uiChannel,
+    uint32 uiMonitoring)
 {
-    uint32          uiReg           = 0;
-    uint32          uiVal           = 0;
-    uint32          uiModuleId      = 0;
-    uint32          uiChannelId     = 0;
-    SALRetCode_t    ret             = SAL_RET_SUCCESS;
+    uint32 uiReg = 0;
+    uint32 uiVal = 0;
+    uint32 uiModuleId = 0;
+    uint32 uiChannelId = 0;
+    SALRetCode_t ret = SAL_RET_SUCCESS;
 
-    if(PDM_OUT_CH_MAX <= uiChannel)
+    if (PDM_OUT_CH_MAX <= uiChannel)
     {
         PDM_Err("Invalid channel number \n");
         ret = SAL_RET_FAILED;
     }
-    else if(PMM_ON < uiMonitoring)
+    else if (PMM_ON < uiMonitoring)
     {
         PDM_Err("Invalid uiMonitoring option \n");
         ret = SAL_RET_FAILED;
     }
     else
     {
-        uiModuleId   = PDMHandler[uiChannel].chModuleId;
-        uiChannelId  = PDMHandler[uiChannel].chChannelId;
+        uiModuleId = PDMHandler[uiChannel].chModuleId;
+        uiChannelId = PDMHandler[uiChannel].chChannelId;
 
-        if((uiModuleId < PDM_TOTAL_MODULES) && (uiChannelId < PDM_TOTAL_CH_PER_MODULE))
+        if ((uiModuleId < PDM_TOTAL_MODULES) && (uiChannelId < PDM_TOTAL_CH_PER_MODULE))
         {
 #ifdef PDM_SAFETY_FEATURE_ENABLED
-            if(uiMonitoring == PMM_ON)
+            if (uiMonitoring == PMM_ON)
             {
                 (void)PMM_EnableProcess(uiChannel);
             }
@@ -1990,7 +1906,7 @@ SALRetCode_t PDM_Enable
             /* At least 1 Cycle delay required based on 'Peripheral_Clock/DIV_x' in 12.5.1 Safety Feature */
             PDM_Delay1u(1UL);
 
-            if(PDM_GetChannelStatus(uiChannel) != PDM_ON)
+            if (PDM_GetChannelStatus(uiChannel) != PDM_ON)
             {
                 /* triggering output generation PDM-A/B/C/D */
                 uiVal = SAL_ReadReg(uiReg) | ((uint32)0x1U << (PDM_GetOPENTrigReg(uiChannelId)));
@@ -2003,7 +1919,7 @@ SALRetCode_t PDM_Enable
         }
     }
 
-    return ret; //success
+    return ret; // success
 }
 
 /*
@@ -2020,37 +1936,35 @@ SALRetCode_t PDM_Enable
 *
 ***************************************************************************************************
 */
-SALRetCode_t PDM_Disable
-(
-    uint32                              uiChannel,
-    uint32                              uiMonitoring
-)
+SALRetCode_t PDM_Disable(
+    uint32 uiChannel,
+    uint32 uiMonitoring)
 {
-    uint32          uiReg           = 0;
-    uint32          uiVal           = 0;
-    uint32          uiModuleId      = 0;
-    uint32          uiChannelId     = 0;
-    SALRetCode_t    ret             = SAL_RET_FAILED;
+    uint32 uiReg = 0;
+    uint32 uiVal = 0;
+    uint32 uiModuleId = 0;
+    uint32 uiChannelId = 0;
+    SALRetCode_t ret = SAL_RET_FAILED;
 
-    if(PDM_OUT_CH_MAX <= uiChannel)
+    if (PDM_OUT_CH_MAX <= uiChannel)
     {
         PDM_Err("Invalid channel number \n");
         ret = SAL_RET_FAILED;
     }
-    else if(PMM_ON < uiMonitoring)
+    else if (PMM_ON < uiMonitoring)
     {
         PDM_Err("Invalid uiMonitoring option \n");
         ret = SAL_RET_FAILED;
     }
     else
     {
-        uiModuleId   = PDMHandler[uiChannel].chModuleId;
-        uiChannelId  = PDMHandler[uiChannel].chChannelId;
+        uiModuleId = PDMHandler[uiChannel].chModuleId;
+        uiChannelId = PDMHandler[uiChannel].chChannelId;
 
-        if((uiModuleId < PDM_TOTAL_MODULES) && (uiChannelId < PDM_TOTAL_CH_PER_MODULE))
+        if ((uiModuleId < PDM_TOTAL_MODULES) && (uiChannelId < PDM_TOTAL_CH_PER_MODULE))
         {
 #ifdef PDM_SAFETY_FEATURE_ENABLED
-            if(uiMonitoring == PMM_ON)
+            if (uiMonitoring == PMM_ON)
             {
                 (void)PMM_DisableMonitoring(uiChannel);
             }
@@ -2083,23 +1997,21 @@ SALRetCode_t PDM_Disable
 *
 ***************************************************************************************************
 */
-uint32 PDM_GetChannelStatus
-(
-    uint32                              uiChannel
-)
+uint32 PDM_GetChannelStatus(
+    uint32 uiChannel)
 {
-    uint32          uiReg           = 0;
-    uint32          uiVal           = 0;
-    uint32          uiModuleId      = 0;
-    uint32          uiChannelId     = 0;
-    uint32          ret             = PDM_REG_MAX_VALUE;
+    uint32 uiReg = 0;
+    uint32 uiVal = 0;
+    uint32 uiModuleId = 0;
+    uint32 uiChannelId = 0;
+    uint32 ret = PDM_REG_MAX_VALUE;
 
-    if(uiChannel < PDM_OUT_CH_MAX)
+    if (uiChannel < PDM_OUT_CH_MAX)
     {
-        uiModuleId   = PDMHandler[uiChannel].chModuleId;
-        uiChannelId  = PDMHandler[uiChannel].chChannelId;
+        uiModuleId = PDMHandler[uiChannel].chModuleId;
+        uiChannelId = PDMHandler[uiChannel].chChannelId;
 
-        if((uiModuleId < PDM_TOTAL_MODULES) && (uiChannelId < PDM_TOTAL_CH_PER_MODULE))
+        if ((uiModuleId < PDM_TOTAL_MODULES) && (uiChannelId < PDM_TOTAL_CH_PER_MODULE))
         {
             uiReg = PDM_BASE + PDM_STATUS_REG_OFFSET + (uiModuleId * PDM_MODULE_OFFSET);
             uiVal = SAL_ReadReg(uiReg);
@@ -2125,20 +2037,18 @@ uint32 PDM_GetChannelStatus
 *
 ***************************************************************************************************
 */
-SALRetCode_t PDM_SetConfig
-(
-    uint32                              uiChannel,
-    PDMModeConfig_t *                   pModeConfig
-)
+SALRetCode_t PDM_SetConfig(
+    uint32 uiChannel,
+    PDMModeConfig_t *pModeConfig)
 {
-    SALRetCode_t    ret             = SAL_RET_SUCCESS;
+    SALRetCode_t ret = SAL_RET_SUCCESS;
 
-    if(PDM_OUT_CH_MAX <= uiChannel)
+    if (PDM_OUT_CH_MAX <= uiChannel)
     {
         PDM_Err("Invalid channel number \n");
         ret = SAL_RET_FAILED;
     }
-    else if(pModeConfig == (PDMModeConfig_t*)NULL)
+    else if (pModeConfig == (PDMModeConfig_t *)NULL)
     {
         PDM_Err("Invalid configuration pointer \n");
         ret = SAL_RET_FAILED;
@@ -2147,20 +2057,20 @@ SALRetCode_t PDM_SetConfig
     {
         ret = PDM_ConfigOutput(uiChannel, pModeConfig);
 
-        if(ret != SAL_RET_SUCCESS)
+        if (ret != SAL_RET_SUCCESS)
         {
             PDM_Err("ERROR! PDM Configuration FAIL!\n");
         }
         else
         {
-            if((pModeConfig->mcOperationMode == PDM_OUTPUT_MODE_PHASE_1) ||
-               (pModeConfig->mcOperationMode == PDM_OUTPUT_MODE_PHASE_2))
+            if ((pModeConfig->mcOperationMode == PDM_OUTPUT_MODE_PHASE_1) ||
+                (pModeConfig->mcOperationMode == PDM_OUTPUT_MODE_PHASE_2))
             {
                 ret = PDM_ConfigPhaseMode(uiChannel, pModeConfig);
             }
-            else if((pModeConfig->mcOperationMode == PDM_OUTPUT_MODE_REGISTER_1) ||
-                    (pModeConfig->mcOperationMode == PDM_OUTPUT_MODE_REGISTER_2) ||
-                    (pModeConfig->mcOperationMode == PDM_OUTPUT_MODE_REGISTER_3))
+            else if ((pModeConfig->mcOperationMode == PDM_OUTPUT_MODE_REGISTER_1) ||
+                     (pModeConfig->mcOperationMode == PDM_OUTPUT_MODE_REGISTER_2) ||
+                     (pModeConfig->mcOperationMode == PDM_OUTPUT_MODE_REGISTER_3))
             {
                 ret = PDM_SetRegisterMode(uiChannel, pModeConfig);
             }
@@ -2175,5 +2085,4 @@ SALRetCode_t PDM_SetConfig
     return ret;
 }
 
-#endif  // ( MCU_BSP_SUPPORT_DRIVER_PDM == 1 )
-
+#endif // ( MCU_BSP_SUPPORT_DRIVER_PDM == 1 )
