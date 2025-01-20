@@ -60,15 +60,12 @@ sAnalogPinInfo_t sAnalogPinInfo[32] = {
   @return: pdm channel number (0~8)
 */
 uint32_t pinToPdmChannel(uint32_t ulPin) {
-  #if defined(BOARD_VCP_B)
   /* search pdm channel number from pin number */
   for (uint32_t i = 0; i < PDM_TOTAL_CHANNELS; i++) {
     if (sPdmChannelConfig[i].pin == ulPin) {
       return sPdmChannelConfig[i].portNum;
     }
   }
-  #elif defined(BOARD_VCP_G)
-  #endif
 }
 
 /* 
@@ -77,15 +74,12 @@ uint32_t pinToPdmChannel(uint32_t ulPin) {
   @return: pdm port channel number (0~3) (GPIO-A, GPIO-B, GPIO-C, GPIO-K)
 */
 uint32_t pinToPdmPortCh(uint32_t ulPin) {
-  #if defined(BOARD_VCP_B)
   /* search pdm port channel number from pin number */
   for (uint32_t i = 0; i < PDM_TOTAL_CHANNELS; i++) {
     if (sPdmChannelConfig[i].pin == ulPin) {
       return sPdmChannelConfig[i].portSelCh;
     }
   }
-  #elif defined(BOARD_VCP_G)
-  #endif
 }
 
 /*

@@ -59,6 +59,7 @@ typedef struct {
 
 #define PDM_TOTAL_CHANNELS 9
 
+#if defined(BOARD_VCP_B)
 static PDMChannelConfig_t sPdmChannelConfig[PDM_TOTAL_CHANNELS] = {
   { 11, GPIO_PERICH_SEL_PWMSEL_0, GPIO_PERICH_CH1 },  // PWM_CH[00] -> arduino pin 11 -> pdm channel 0, channel 1(GPIO-B)
   { 22, GPIO_PERICH_SEL_PWMSEL_1, GPIO_PERICH_CH3 },  // PWM_CH[01] -> arduino pin 22 -> pdm channel 1, channel 3(GPIO-K)
@@ -70,6 +71,19 @@ static PDMChannelConfig_t sPdmChannelConfig[PDM_TOTAL_CHANNELS] = {
   { 26, GPIO_PERICH_SEL_PWMSEL_7, GPIO_PERICH_CH2 },  // PWM_CH[07] -> arduino pin 26 -> pdm channel 5, channel 2(GPIO-C)
   { 38, GPIO_PERICH_SEL_PWMSEL_8, GPIO_PERICH_CH2 },  // PWM_CH[08] -> arduino pin 38 -> pdm channel 6, channel 2(GPIO-C)
 };
+#elif defined(BOARD_VCP_G)
+static PDMChannelConfig_t sPdmChannelConfig[PDM_TOTAL_CHANNELS] = {
+  { 45, GPIO_PERICH_SEL_PWMSEL_0, GPIO_PERICH_CH0 },  // PWM_CH[00] -> arduino pin 45 -> pdm channel 0, channel 0(GPIO-A)
+  { 44, GPIO_PERICH_SEL_PWMSEL_1, GPIO_PERICH_CH0 },  // PWM_CH[01] -> arduino pin 44 -> pdm channel 1, channel 0(GPIO-A)
+  { 9,  GPIO_PERICH_SEL_PWMSEL_2, GPIO_PERICH_CH0 },  // PWM_CH[02] -> arduino pin 9 -> pdm channel 2, channel 0(GPIO-A)
+  { 6,  GPIO_PERICH_SEL_PWMSEL_3, GPIO_PERICH_CH0 },  // PWM_CH[03] -> arduino pin 6 -> pdm channel 3, channel 0(GPIO-A)
+  { 5,  GPIO_PERICH_SEL_PWMSEL_4, GPIO_PERICH_CH1 },  // PWM_CH[04] -> arduino pin 5 -> pdm channel 4, channel 1(GPIO-B)
+  { 3,  GPIO_PERICH_SEL_PWMSEL_5, GPIO_PERICH_CH1 },  // PWM_CH[05] -> arduino pin 3 -> pdm channel 5, channel 1(GPIO-B)
+  { 43, GPIO_PERICH_SEL_PWMSEL_6, GPIO_PERICH_CH0 },  // PWM_CH[06] -> arduino pin 43 -> pdm channel 6, channel 0(GPIO-A)
+  { 42, GPIO_PERICH_SEL_PWMSEL_7, GPIO_PERICH_CH0 },  // PWM_CH[07] -> arduino pin 42 -> pdm channel 7, channel 0(GPIO-A)
+  { 41, GPIO_PERICH_SEL_PWMSEL_8, GPIO_PERICH_CH0 },  // PWM_CH[08] -> arduino pin 41 -> pdm channel 8, channel 0(GPIO-A)
+};
+#endif
 
 /*
  * \brief Reads the value from the specified analog pin.
