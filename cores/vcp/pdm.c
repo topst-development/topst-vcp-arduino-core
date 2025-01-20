@@ -66,8 +66,6 @@ static PMMISRData_t PDMIsrData[PDM_TOTAL_CHANNELS];
 static boolean g_safety_enabled = FALSE;
 #endif
 
-static bool g_pdm_init = FALSE;
-
 /* On the TCC70xx, PDM port is configured at PERICHSEL register (0xA0F222B8) */
 static PDMPortConfig_t sPdmPort[PDM_OUT_PORT_MAX] =
     {
@@ -1765,12 +1763,6 @@ void PDM_Init(void)
 {
     uint32 uiChannel = 0;
 
-    // return if already initialized
-    if(g_pdm_init == TRUE)
-    {
-        return;
-    }
-
     for (uiChannel = 0UL; uiChannel < PDM_OUT_CH_MAX; uiChannel++)
     {
         /* Initialize pdm handle */
@@ -1828,8 +1820,6 @@ void PDM_Init(void)
     }
 #endif
 
-    g_pdm_init = TRUE;
-
     return;
 }
 
@@ -1843,21 +1833,15 @@ void PDM_Init(void)
 *
 ***************************************************************************************************
 */
-void PDM_Deinit(void)
+void PDM_Deinit(
+    void)
 {
-    if(g_pdm_init == FALSE)
-    {
-        return;
-    }
-
     PDM_DisableClock();
     (void)SAL_MemSet(PDMHandler, 0, sizeof(PDMHandler) * PDM_TOTAL_CHANNELS);
 
 #ifdef PDM_SAFETY_FEATURE_ENABLED
     (void)SAL_MemSet(PDMIsrData, 0, sizeof(PDMIsrData) * PDM_TOTAL_CHANNELS);
 #endif
-
-    g_pdm_init == FALSE;
 }
 
 /*
@@ -1877,7 +1861,9 @@ void PDM_Deinit(void)
 *
 ***************************************************************************************************
 */
-SALRetCode_t PDM_Enable(uint32 uiChannel, uint32 uiMonitoring)
+SALRetCode_t PDM_Enable(
+    uint32 uiChannel,
+    uint32 uiMonitoring)
 {
     uint32 uiReg = 0;
     uint32 uiVal = 0;
