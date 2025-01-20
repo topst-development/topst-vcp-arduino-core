@@ -26,6 +26,9 @@
 extern "C" {
 #endif
 
+static bool isPdmInitialized = false;
+static bool isAdcInitialized = false;
+
 #if defined(BOARD_VCP_G)
 /* ADC channel and module information */
 typedef struct {
@@ -51,7 +54,41 @@ sAnalogPinInfo_t sAnalogPinInfo[32] = {
   { AREF, ADC_MODULE_0, 6 }
 };
 #endif
+
+/* get pdm channel number from pin number
+  @param ulPin: The analog pin number to read from
+  @return: pdm channel number (0~8)
+*/
+uint32_t pinToPdmChannel(uint32_t ulPin) {
+  #if defined(BOARD_VCP_B)
+  /* search pdm channel number from pin number */
+  for (uint32_t i = 0; i < PDM_TOTAL_CHANNELS; i++) {
+    if (sPdmChannelConfig[i].pin == ulPin) {
+      return sPdmChannelConfig[i].portNum;
+    }
+  }
+  #elif defined(BOARD_VCP_G)
+  #endif
+}
+
 /* 
+  get pdm port channel number from pin number
+  @param ulPin: The analog pin number to read from
+  @return: pdm port channel number (0~3) (GPIO-A, GPIO-B, GPIO-C, GPIO-K)
+*/
+uint32_t pinToPdmPortCh(uint32_t ulPin) {
+  #if defined(BOARD_VCP_B)
+  /* search pdm port channel number from pin number */
+  for (uint32_t i = 0; i < PDM_TOTAL_CHANNELS; i++) {
+    if (sPdmChannelConfig[i].pin == ulPin) {
+      return sPdmChannelConfig[i].portSelCh;
+    }
+  }
+  #elif defined(BOARD_VCP_G)
+  #endif
+}
+
+/*
   Performs an analog read operation on the specified pin.
   This function handles both the initialization and reading of the analog pin.
   
@@ -62,8 +99,11 @@ uint32_t analogRead(uint32_t ulPin)
 {
   uint32_t value = 0;
 
-  ADC_Init(ADC_MODE_NORMAL, ADC_MODULE_0);
-  ADC_Init(ADC_MODE_NORMAL, ADC_MODULE_1);
+  if (!isAdcInitialized) {
+    ADC_Init(ADC_MODE_NORMAL, ADC_MODULE_0);
+    ADC_Init(ADC_MODE_NORMAL, ADC_MODULE_1);
+    isAdcInitialized = true;
+  }
 
   #if defined(BOARD_VCP_B)
   switch (ulPin)
@@ -87,29 +127,32 @@ uint32_t analogRead(uint32_t ulPin)
 
 void analogWrite(uint32_t ulPin, uint32_t ulValue)
 {
-
-  SALRetCode_t ret = SAL_RET_FAILED;
-
   uint32_t uiDutyRate = ulValue;
   PDMModeConfig_t sModeConfigInfo = {0,};
+  SALRetCode_t ret = SAL_RET_FAILED;
 
-  (void)PDM_Init();
+  if (!isPdmInitialized) {
+    PDM_Init();
+    isPdmInitialized = true;
+  }
+
+  /* get pdm channel number from pin number */
+  uint32_t uiChannel = pinToPdmChannel(ulPin);
+
+  /* get pdm port channel number from pin number */
+  uint32_t uiPortCh = pinToPdmPortCh(ulPin);
 
   sModeConfigInfo.mcOperationMode  = PDM_OUTPUT_MODE_PHASE_1;
-  sModeConfigInfo.mcPortNumber     = GPIO_PERICH_CH2;
+  sModeConfigInfo.mcPortNumber     = uiPortCh;
   sModeConfigInfo.mcPeriodNanoSec1 = 1000UL * 1000UL;
   sModeConfigInfo.mcDutyNanoSec1   = uiDutyRate * 1000UL;
 
-  ret = PDM_SetConfig((uint32_t)ulPin, &sModeConfigInfo);
+  ret = PDM_SetConfig(uiChannel, &sModeConfigInfo);
 
   if(ret == SAL_RET_SUCCESS)
   {
-    PDM_Enable((uint32_t)ulPin, PMM_ON);
+    PDM_Enable(uiChannel, PMM_ON);
   }
-
-  //(void)PDM_Disable((uint32_t) ulPin, PMM_ON);
-
-
 }
 
 

@@ -50,6 +50,27 @@ extern "C" {
 #define A8  A08
 #define A9  A09
 #endif
+
+typedef struct {
+  uint32_t pin;
+  uint32_t portNum;
+  uint32_t portSelCh;
+} PDMChannelConfig_t;
+
+#define PDM_TOTAL_CHANNELS 9
+
+static PDMChannelConfig_t sPdmChannelConfig[PDM_TOTAL_CHANNELS] = {
+  { 11, GPIO_PERICH_SEL_PWMSEL_0, GPIO_PERICH_CH1 },  // PWM_CH[00] -> arduino pin 11 -> pdm channel 0, channel 1(GPIO-B)
+  { 22, GPIO_PERICH_SEL_PWMSEL_1, GPIO_PERICH_CH3 },  // PWM_CH[01] -> arduino pin 22 -> pdm channel 1, channel 3(GPIO-K)
+  { 0, 0, 0 },                                        // PWM_CH[02] -> NA
+  { 15, GPIO_PERICH_SEL_PWMSEL_3, GPIO_PERICH_CH3 },  // PWM_CH[03] -> arduino pin 33 -> pdm channel 2, channel 2(GPIO-C)
+  { 0, 0, 0 },                                        // PWM_CH[04] -> NA
+  { 33, GPIO_PERICH_SEL_PWMSEL_5, GPIO_PERICH_CH2 },  // PWM_CH[05] -> arduino pin 33 -> pdm channel 3, channel 2(GPIO-C)
+  { 40, GPIO_PERICH_SEL_PWMSEL_6, GPIO_PERICH_CH2 },  // PWM_CH[06] -> arduino pin 40 -> pdm channel 4, channel 2(GPIO-C)
+  { 26, GPIO_PERICH_SEL_PWMSEL_7, GPIO_PERICH_CH2 },  // PWM_CH[07] -> arduino pin 26 -> pdm channel 5, channel 2(GPIO-C)
+  { 38, GPIO_PERICH_SEL_PWMSEL_8, GPIO_PERICH_CH2 },  // PWM_CH[08] -> arduino pin 38 -> pdm channel 6, channel 2(GPIO-C)
+};
+
 /*
  * \brief Reads the value from the specified analog pin.
  *
