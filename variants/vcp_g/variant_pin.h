@@ -19,8 +19,8 @@
 #define D3 GPIO_GPB(11UL)
 #define D4 GPIO_GPB(27UL)
 #define D5 GPIO_GPB(10UL)
-#define D6 GPIO_GPB(01UL)
-#define D7 GPIO_GPB(13UL)
+#define D6 GPIO_GPA(13UL)
+#define D7 GPIO_GPB(01UL)
 #define D8 GPIO_GPB(00UL)
 #define D9 GPIO_GPA(12UL)
 #define D10 GPIO_GPC(13UL)
@@ -80,8 +80,8 @@ static const uint32_t PIN_MAP[] = {
     GPIO_GPB(11UL), // D3
     GPIO_GPB(27UL), // D4
     GPIO_GPB(10UL), // D5
-    GPIO_GPB(01UL), // D6
-    GPIO_GPB(13UL), // D7
+    GPIO_GPA(13UL), // D6
+    GPIO_GPB(01UL), // D7
     GPIO_GPB(00UL), // D8
     GPIO_GPA(12UL), // D9
     GPIO_GPC(13UL), // D10
