@@ -42,19 +42,19 @@ void shiftOut(uint8_t dataPin, uint8_t clockPin, uint8_t bitOrder, uint8_t val)
 
 	for (i = 0; i < 8; i++)  {
 		if (bitOrder == LSBFIRST) {
-			//hsj digitalWrite(dataPin, val & 1);
-			GPIO_Set(GPIO_GPC(dataPin), val & 1);
+			digitalWrite(dataPin, val & 1);
+			//GPIO_Set(GPIO_GPC(dataPin), val & 1);
 			val >>= 1;
 		} else {	
-			//hsj digitalWrite(dataPin, (val & 128) != 0);
-			GPIO_Set(GPIO_GPC(dataPin), (val & 128) != 0);
+			digitalWrite(dataPin, (val & 128) != 0);
+			//GPIO_Set(GPIO_GPC(dataPin), (val & 128) != 0);
 			val <<= 1;
 		}
 			
-		//hsj digitalWrite(clockPin, HIGH);
-		GPIO_Set(GPIO_GPC(clockPin), HIGH);
-		//hsj digitalWrite(clockPin, LOW);		
-		GPIO_Set(GPIO_GPC(clockPin), LOW);
+		digitalWrite(clockPin, HIGH);
+		//GPIO_Set(GPIO_GPC(clockPin), HIGH);
+		digitalWrite(clockPin, LOW);		
+		//GPIO_Set(GPIO_GPC(clockPin), LOW);
 	}
 }
 
@@ -90,13 +90,12 @@ MAX7219::MAX7219(byte devices, byte dataPin, byte clockPin, byte loadPin)
 		_clockPin = clockPin;
 		_loadPin = loadPin;
 		
-		//hsj
-		// pinMode(_dataPin, OUTPUT);
-		// pinMode(_clockPin, OUTPUT);
-		// pinMode(_loadPin, OUTPUT);
-		GPIO_Config(GPIO_GPC(_dataPin), (GPIO_FUNC(0UL) | GPIO_OUTPUT));
-        GPIO_Config(GPIO_GPC(_clockPin), (GPIO_FUNC(0UL) | GPIO_OUTPUT));
-		GPIO_Config(GPIO_GPC(_loadPin), (GPIO_FUNC(0UL) | GPIO_OUTPUT));
+		pinMode(_dataPin, OUTPUT);
+		pinMode(_clockPin, OUTPUT);
+		pinMode(_loadPin, OUTPUT);
+		//GPIO_Config(GPIO_GPC(_dataPin), (GPIO_FUNC(0UL) | GPIO_OUTPUT));
+        //GPIO_Config(GPIO_GPC(_clockPin), (GPIO_FUNC(0UL) | GPIO_OUTPUT));
+		//GPIO_Config(GPIO_GPC(_loadPin), (GPIO_FUNC(0UL) | GPIO_OUTPUT));
 		
 		/* 	On initial power-up, all control registers are reset, the
 			display is blanked, and the MAX7219/MAX7221 enter
@@ -139,8 +138,8 @@ void MAX7219::_sendData(byte device, byte registerAddress, byte registerData)
 	if(device <= _maxDevices)
 	{
 		// enable data-transfer
-		//hsj digitalWrite(_loadPin, LOW);
-		GPIO_Set(GPIO_GPC(_loadPin), LOW);
+		digitalWrite(_loadPin, LOW);
+		//GPIO_Set(GPIO_GPC(_loadPin), LOW);
 		
 		//for(int i = 1; i <= _maxDevices; i++)
 		for(int i = _maxDevices; i >= 1; i--)
@@ -160,8 +159,8 @@ void MAX7219::_sendData(byte device, byte registerAddress, byte registerData)
 		}
 		
 		// disable data-transfer
-		//hsj digitalWrite(_loadPin, HIGH);
-		GPIO_Set(GPIO_GPC(_loadPin), HIGH);
+		digitalWrite(_loadPin, HIGH);
+		//GPIO_Set(GPIO_GPC(_loadPin), HIGH);
 	}
 };
 

@@ -1,9 +1,9 @@
 #include <MAX7219.h>
 
 // 8x8 Dot-Matrix
-#define DATAPIN     14 //GPIO_C14(SPI1_CS)
-#define CLOCKPIN    12 //GPIO_C12(SPI1_CLK)
-#define LOADPIN     13 //GPIO_C13(SPI1_DO)
+#define LOADPIN 38 //GPIO_C14(SPI1_DO)
+#define CLOCKPIN 40 //GPIO_C12(SPI1_CLK)
+#define DATAPIN 26 //GPIO_C13(SPI1_CS)
 
 // binary represention of a heart shape
 const static byte HEART[8] = {
