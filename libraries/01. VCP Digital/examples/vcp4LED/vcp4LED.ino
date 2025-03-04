@@ -2,8 +2,7 @@
 *  TOPST VCP : 4 LED Control
 */
 
-int ledPin[] = {3, 5, 7, 8};
-int buttonPin[] = {10};
+int ledPin[] = {47, 17, 50, 48};
 
 // the setup function runs once when you press reset or power the board
 void setup() {
@@ -13,14 +12,10 @@ void setup() {
     pinMode(ledPin[i], OUTPUT);
     digitalWrite(ledPin[i], HIGH);
   }
-
-  pinMode(buttonPin[0], INPUT);
-
 }
   
 // the loop function runs over and over again forever
 void loop() {
-
   for(int i=0; i<4; i++)
   {
     digitalWrite(ledPin[i], LOW);
@@ -32,5 +27,4 @@ void loop() {
     digitalWrite(ledPin[i], HIGH);
     delay(500);
   }
-
 }

@@ -2,8 +2,8 @@
 *  TOPST VCP : 4 LED and Button Control
 */
 
-int ledPin[] = {3, 5, 7, 8};
-int buttonPin[] = {10};
+int ledPin[] = {47, 17, 50, 48};
+int buttonPin[] = {45};
 
 // the setup function runs once when you press reset or power the board
 void setup() {

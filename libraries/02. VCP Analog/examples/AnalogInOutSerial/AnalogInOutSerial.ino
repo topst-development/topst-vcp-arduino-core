@@ -16,8 +16,8 @@
 HardwareSerial Serial;
 
 // These constants won't change. They're used to give names to the pins used:
-const int analogInPin = 16;  // Analog input pin that the potentiometer is attached to
-const int analogOutPin = 5;  // Analog output pin that the LED is attached to
+const int analogInPin = 43;  // Analog input pin that the potentiometer is attached to
+const int analogOutPin = A5;  // Analog output pin that the LED is attached to
 
 int sensorValue = 0;  // value read from the pot
 int outputValue = 0;  // value output to the PWM (analog out)
@@ -33,7 +33,7 @@ void loop() {
   // map it to the range of the analog out:
   outputValue = map(sensorValue, 0, 4095, 0, 1000);
   // change the analog out value:
-  analogWrite(analogOutPin, outputValue);
+  analogWrite(analogOutPin, outputValue / 4);
 
   // print the results to the Serial Monitor:
   Serial.print("sensor = ");
