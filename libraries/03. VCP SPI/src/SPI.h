@@ -147,7 +147,7 @@ public:
     uint32                                 xfer_mode;
 
     cs_high = 0;
-    cs_le          = GPIO_GPC(13UL);
+    cs_le          = GPIO_GPC(13UL) | GPIO_GPA(01UL);
         led_oe     = GPIO_GPA(24UL);
 
     xfer_mode = GPSB_XFER_MODE_PIO | GPSB_XFER_MODE_WITHOUT_INTERRUPT;
