@@ -31,7 +31,7 @@ HardwareSerial::HardwareSerial()
 {
   (void)UART_Close(UART_DEBUG_CH);
   (void)UART_Open(UART_DEBUG_CH, GIC_PRIORITY_NO_MEAN, 115200UL, UART_POLLING_MODE,
-                  UART_CTSRTS_OFF, 4U, WORD_LEN_8, DISABLE_FIFO, TWO_STOP_BIT_OFF, 
+                  UART_CTSRTS_OFF, 2U, WORD_LEN_8, DISABLE_FIFO, TWO_STOP_BIT_OFF, 
                   PARITY_SPACE, 0UL); 
 }
 
@@ -47,7 +47,7 @@ void HardwareSerial::begin(uint32 baud)
 {
   (void)UART_Close(UART_DEBUG_CH);
   (void)UART_Open(UART_DEBUG_CH, GIC_PRIORITY_NO_MEAN, baud, UART_POLLING_MODE,
-                  UART_CTSRTS_OFF, 4U, WORD_LEN_8, DISABLE_FIFO, TWO_STOP_BIT_OFF, 
+                  UART_CTSRTS_OFF, 2U, WORD_LEN_8, DISABLE_FIFO, TWO_STOP_BIT_OFF, 
                   PARITY_SPACE, 0UL);  
 }
 
