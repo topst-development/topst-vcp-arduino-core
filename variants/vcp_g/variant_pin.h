@@ -141,6 +141,6 @@ static const uint32_t PIN_MAP[] = {
     GPIO_GPK(16UL) // LED_BUILTIN
 };
 
-#define LED_BUILTIN 58
+#define LED_BUILTIN 61
 
 #endif /* VARIANT_PIN_H */
