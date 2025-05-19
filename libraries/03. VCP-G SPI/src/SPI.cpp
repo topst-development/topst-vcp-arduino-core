@@ -41,9 +41,9 @@ void SPIClass::begin()
 
     GPSBOpenParam_t                     OpenParam;
 
-    OpenParam.uiSdo         = GPIO_GPC(14UL);
-    OpenParam.uiSdi         = GPIO_GPC(15UL);
-    OpenParam.uiSclk        = GPIO_GPC(12UL);
+    OpenParam.uiSdo         = GPIO_GPC(14UL) | GPIO_GPA(02UL) | GPIO_GPB(06UL);
+    OpenParam.uiSdi         = GPIO_GPC(15UL) | GPIO_GPA(03UL) | GPIO_GPB(07UL);
+    OpenParam.uiSclk        = GPIO_GPC(12UL) | GPIO_GPA(00UL) | GPIO_GPB(04UL);
     OpenParam.pDmaAddrTx    = NULL_PTR;
     OpenParam.pDmaAddrRx    = NULL_PTR;
     OpenParam.uiDmaBufSize  = 0;
@@ -51,7 +51,7 @@ void SPIClass::begin()
     OpenParam.pArg          = NULL_PTR;
     OpenParam.uiIsSlave     = GPSB_MASTER_MODE;
 
-    cs_le       = GPIO_GPC(13UL);
+    cs_le       = GPIO_GPC(13UL) | GPIO_GPA(01UL) | GPIO_GPB(05UL);
     led_oe      = GPIO_GPA(24UL);
     led_pctl    = GPIO_GPC(11UL);
 

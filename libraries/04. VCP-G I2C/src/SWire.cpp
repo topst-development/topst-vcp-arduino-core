@@ -17,6 +17,11 @@ void SoftWire::sclHi() {
   #elif defined(BOARD_VCP_G)
   /* VCP_G use GPIO_GPA(4UL) as SCL and GPIO_GPA(5UL) as SDA */
   GPIO_Config(GPIO_GPA(4UL), (GPIO_FUNC(0UL) | GPIO_INPUTBUF_EN | GPIO_PULLUP));
+  GPIO_Config(GPIO_GPA(24UL), (GPIO_FUNC(0UL) | GPIO_INPUTBUF_EN | GPIO_PULLUP));
+  GPIO_Config(GPIO_GPB(0UL), (GPIO_FUNC(0UL) | GPIO_INPUTBUF_EN | GPIO_PULLUP));
+  GPIO_Config(GPIO_GPB(2UL), (GPIO_FUNC(0UL) | GPIO_INPUTBUF_EN | GPIO_PULLUP));
+  GPIO_Config(GPIO_GPC(4UL), (GPIO_FUNC(0UL) | GPIO_INPUTBUF_EN | GPIO_PULLUP));
+  GPIO_Config(GPIO_GPC(7UL), (GPIO_FUNC(0UL) | GPIO_INPUTBUF_EN | GPIO_PULLUP));
   #else
   #error BOARD_VCP_B or BOARD_VCP_G is not defined
   #endif
@@ -28,6 +33,11 @@ void SoftWire::sdaHi() {
   #elif defined(BOARD_VCP_G)
   /* VCP_G use GPIO_GPA(5UL) as SDA */
   GPIO_Config(GPIO_GPA(5UL), (GPIO_FUNC(0UL) | GPIO_INPUTBUF_EN | GPIO_PULLUP));
+  GPIO_Config(GPIO_GPA(26UL), (GPIO_FUNC(0UL) | GPIO_INPUTBUF_EN | GPIO_PULLUP));
+  GPIO_Config(GPIO_GPB(1UL), (GPIO_FUNC(0UL) | GPIO_INPUTBUF_EN | GPIO_PULLUP));
+  GPIO_Config(GPIO_GPB(3UL), (GPIO_FUNC(0UL) | GPIO_INPUTBUF_EN | GPIO_PULLUP));
+  GPIO_Config(GPIO_GPC(5UL), (GPIO_FUNC(0UL) | GPIO_INPUTBUF_EN | GPIO_PULLUP));
+  GPIO_Config(GPIO_GPC(6UL), (GPIO_FUNC(0UL) | GPIO_INPUTBUF_EN | GPIO_PULLUP));
   #else
   #error BOARD_VCP_B or BOARD_VCP_G is not defined
   #endif
@@ -41,6 +51,16 @@ void SoftWire::sclLo() {
   /* VCP_G use GPIO_GPA(4UL) as SCL */
   GPIO_Set(GPIO_GPA(4UL), 0UL);
   GPIO_Config(GPIO_GPA(4UL), (GPIO_FUNC(0UL) | GPIO_OUTPUT));
+  GPIO_Set(GPIO_GPA(24UL), 0UL);
+  GPIO_Config(GPIO_GPA(24UL), (GPIO_FUNC(0UL) | GPIO_OUTPUT));
+  GPIO_Set(GPIO_GPB(0UL), 0UL);
+  GPIO_Config(GPIO_GPB(0UL), (GPIO_FUNC(0UL) | GPIO_OUTPUT));
+  GPIO_Set(GPIO_GPB(2UL), 0UL);
+  GPIO_Config(GPIO_GPB(2UL), (GPIO_FUNC(0UL) | GPIO_OUTPUT));
+  GPIO_Set(GPIO_GPC(4UL), 0UL);
+  GPIO_Config(GPIO_GPC(4UL), (GPIO_FUNC(0UL) | GPIO_OUTPUT));
+  GPIO_Set(GPIO_GPC(7UL), 0UL);
+  GPIO_Config(GPIO_GPC(7UL), (GPIO_FUNC(0UL) | GPIO_OUTPUT));
   #else
   #error BOARD_VCP_B or BOARD_VCP_G is not defined
   #endif
@@ -54,6 +74,16 @@ void SoftWire::sdaLo() {
   /* VCP_G use GPIO_GPA(5UL) as SDA */
   GPIO_Set(GPIO_GPA(5UL), 0UL);
   GPIO_Config(GPIO_GPA(5UL), (GPIO_FUNC(0UL) | GPIO_OUTPUT));
+  GPIO_Set(GPIO_GPA(26UL), 0UL);
+  GPIO_Config(GPIO_GPA(26UL), (GPIO_FUNC(0UL) | GPIO_OUTPUT));
+  GPIO_Set(GPIO_GPB(1UL), 0UL);
+  GPIO_Config(GPIO_GPB(1UL), (GPIO_FUNC(0UL) | GPIO_OUTPUT));
+  GPIO_Set(GPIO_GPB(3UL), 0UL);
+  GPIO_Config(GPIO_GPB(3UL), (GPIO_FUNC(0UL) | GPIO_OUTPUT));
+  GPIO_Set(GPIO_GPC(5UL), 0UL);
+  GPIO_Config(GPIO_GPC(5UL), (GPIO_FUNC(0UL) | GPIO_OUTPUT));
+  GPIO_Set(GPIO_GPC(6UL), 0UL);
+  GPIO_Config(GPIO_GPC(6UL), (GPIO_FUNC(0UL) | GPIO_OUTPUT));
   #else
   #error BOARD_VCP_B or BOARD_VCP_G is not defined
   #endif
@@ -120,7 +150,13 @@ uint8_t SoftWire::readBit() {
   out_bit = GPIO_Get(GPIO_GPB(3UL)); 
   #elif defined(BOARD_VCP_G)
   /* VCP_G use GPIO_GPA(5UL) as SDA */
-  out_bit = GPIO_Get(GPIO_GPA(5UL)); 
+  uint8_t out_bit_a5  = GPIO_Get(GPIO_GPA(5UL)); 
+  uint8_t out_bit_a26 = GPIO_Get(GPIO_GPA(26UL)); 
+  uint8_t out_bit_b3  = GPIO_Get(GPIO_GPB(3UL)); 
+  uint8_t out_bit_b1  = GPIO_Get(GPIO_GPB(1UL)); 
+  uint8_t out_bit_c6  = GPIO_Get(GPIO_GPC(6UL)); 
+  uint8_t out_bit_c5  = GPIO_Get(GPIO_GPC(5UL)); 
+  out_bit = out_bit_a5 & out_bit_a26 & out_bit_b3 & out_bit_b1 & out_bit_c6 & out_bit_c5;
   #else
   #error BOARD_VCP_B or BOARD_VCP_G is not defined
   #endif
@@ -152,7 +188,13 @@ uint8_t SoftWire::readAck() {
   uint8_t result =GPIO_Get(GPIO_GPB(3UL)); 
   #elif defined(BOARD_VCP_G)
   /* VCP_G use GPIO_GPA(5UL) as SDA */
-  uint8_t result =GPIO_Get(GPIO_GPA(5UL)); 
+  uint8_t result_a5  = GPIO_Get(GPIO_GPA(5UL));
+  uint8_t result_a26 = GPIO_Get(GPIO_GPA(26UL)); 
+  uint8_t result_b3  = GPIO_Get(GPIO_GPB(3UL)); 
+  uint8_t result_b1  = GPIO_Get(GPIO_GPB(1UL)); 
+  uint8_t result_c6  = GPIO_Get(GPIO_GPC(6UL)); 
+  uint8_t result_c5  = GPIO_Get(GPIO_GPC(5UL)); 
+  uint8_t result = result_a5 & result_a26 & result_b3 & result_b1 & result_c6 & result_c5;
   #else
   #error BOARD_VCP_B or BOARD_VCP_G is not defined
   #endif
