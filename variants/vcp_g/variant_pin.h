@@ -74,6 +74,7 @@
 #define D58 GPIO_GPB(04UL)
 #define D59 GPIO_GPB(06UL)
 #define D60 GPIO_GPB(05UL)
+#defind D61 GPIO_GPB(07UL)
 
 /* GPIO Pin mapping table for VCP-G */
 static const uint32_t PIN_MAP[] = {
@@ -138,9 +139,10 @@ static const uint32_t PIN_MAP[] = {
     GPIO_GPB(04UL), // D58
     GPIO_GPB(06UL), // D59
     GPIO_GPB(05UL), // D60
+    GPIO_GPB(07UL), // D61
     GPIO_GPK(16UL) // LED_BUILTIN
 };
 
-#define LED_BUILTIN 61
+#define LED_BUILTIN 62
 
 #endif /* VARIANT_PIN_H */
