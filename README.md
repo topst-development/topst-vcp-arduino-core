@@ -1,15 +1,9 @@
 # Introduction
 This document describes how to use Arduino IDE for the TOPST Vehicle Control Processor (VCP), which is a powerful and efficient processor designed for automotive applications and based on the Telechips TCC7045. The goal is to integrate the TOPST VCP-G with the Arduino environment to provide a development environment that parallels the simplicity and flexibility of Arduino, specifically tailored for automotive semiconductors, and simplify and expedite the development process.  
 
-This document includes information on the following:  
-- Installation Guide
-
-</br>
-
-# Installation Guide
+## Installation Guide
 This chapter describes how to download and install the TOPST VCP-G Arduino packageto use with the Arduino Integrated Development Environment (IDE).
 
-## Installation Guide
 **Step 1: Download the Arduino IDE**
 
 First, you need the Arduino IDE which serves as the platform to program your Arduino boards.  
